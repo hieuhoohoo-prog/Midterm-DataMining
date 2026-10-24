@@ -9,7 +9,7 @@ import database, models
 
 SECRET_KEY = "student-guard-midterm-secret-key-change-in-prod"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 tiếng
+ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 hours
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -33,7 +33,7 @@ def get_current_user(
 ) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Token không hợp lệ hoặc đã hết hạn",
+        detail="Invalid or expired token",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -53,7 +53,7 @@ def require_admin(current_user: models.User = Depends(get_current_user)) -> mode
     if current_user.role != "Admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Quyền truy cập bị từ chối: Chỉ dành cho Admin",
+            detail="Access denied: Admin only",
         )
     return current_user
 
@@ -63,6 +63,6 @@ def require_advisor_or_admin(
     if current_user.role not in ["Admin", "Academic Advisor"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Quyền truy cập bị từ chối",
+            detail="Access denied",
         )
     return current_user

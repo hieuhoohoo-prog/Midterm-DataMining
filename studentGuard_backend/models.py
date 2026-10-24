@@ -10,7 +10,7 @@ class User(Base):
     username = Column(String(50), unique=True, index=True, nullable=False)
     full_name = Column(String(100), nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    role = Column(String(30), nullable=False)  # "Admin" hoặc "Academic Advisor"
+    role = Column(String(30), nullable=False)  # "Admin" or "Academic Advisor"
 
 
 class Student(Base):
@@ -19,7 +19,7 @@ class Student(Base):
     id = Column(Integer, primary_key=True, index=True)
     student_code = Column(String(20), unique=True, index=True, nullable=False)
 
-    # --- 24 Cột Enrollment & Macro ---
+    # --- 24 Enrollment & Macro Columns ---
     marital_status = Column(Integer, nullable=False)
     application_mode = Column(Integer, nullable=False)
     application_order = Column(Integer, nullable=False)
@@ -45,7 +45,7 @@ class Student(Base):
     inflation_rate = Column(Float, nullable=False)
     gdp = Column(Float, nullable=False)
 
-    # --- 6 Cột Semester 1 ---
+    # --- 6 Semester 1 Columns ---
     curricular_units_1st_sem_credited = Column(Integer, nullable=False)
     curricular_units_1st_sem_enrolled = Column(Integer, nullable=False)
     curricular_units_1st_sem_evaluations = Column(Integer, nullable=False)
@@ -53,7 +53,7 @@ class Student(Base):
     curricular_units_1st_sem_grade = Column(Float, nullable=False)
     curricular_units_1st_sem_without_evaluations = Column(Integer, nullable=False)
 
-    # --- 6 Cột Semester 2 ---
+    # --- 6 Semester 2 Columns ---
     curricular_units_2nd_sem_credited = Column(Integer, nullable=False)
     curricular_units_2nd_sem_enrolled = Column(Integer, nullable=False)
     curricular_units_2nd_sem_evaluations = Column(Integer, nullable=False)
@@ -61,7 +61,7 @@ class Student(Base):
     curricular_units_2nd_sem_grade = Column(Float, nullable=False)
     curricular_units_2nd_sem_without_evaluations = Column(Integer, nullable=False)
 
-    # --- Cột Target gốc ---
+    # --- Original Target Column ---
     target = Column(String(20), nullable=True)  # "Dropout", "Enrolled", "Graduate"
 
 

@@ -4,7 +4,7 @@ import csv
 from database import SessionLocal, engine
 import models, security
 
-# Đường dẫn trỏ tới file CSV sạch của Data Lead
+# Path to the cleaned CSV file from the Data Lead
 CSV_PATH = "../StudentGuard_DataLead_bundle/data/processed/student_dropout_clean.csv"
 
 def seed_database():
@@ -12,7 +12,7 @@ def seed_database():
     db = SessionLocal()
 
     try:
-        # 1. Tạo tài khoản Admin và Academic Advisor mặc định
+        # 1. Create default Admin and Academic Advisor accounts
         if db.query(models.User).count() == 0:
             users = [
                 models.User(
@@ -30,24 +30,24 @@ def seed_database():
             ]
             db.add_all(users)
             db.commit()
-            print("[OK] Đã tạo tài khoản mẫu: admin/admin123 và advisor/advisor123")
+            print("[OK] Created sample accounts: admin/admin123 and advisor/advisor123")
 
-        # 2. Nạp 4,424 dòng bằng thư viện CSV mặc định (Bypass lỗi AppLocker của Pandas)
+        # 2. Import 4,424 rows using the default CSV library (bypass Pandas AppLocker issues)
         if db.query(models.Student).count() == 0:
             if not os.path.exists(CSV_PATH):
-                print(f"[CẢNH BÁO] Không tìm thấy file tại {CSV_PATH}. Hãy kiểm tra lại đường dẫn!")
+                print(f"[WARNING] File not found at {CSV_PATH}. Please check the path again!")
                 return
 
             student_objs = []
-            
+
             with open(CSV_PATH, mode="r", encoding="utf-8-sig") as file:
                 reader = csv.DictReader(file)
                 for idx, row in enumerate(reader, start=1):
                     student_data = {
                         "student_code": f"SV{idx:04d}"
                     }
-                    
-                    # Ép kiểu dữ liệu vì DictReader luôn đọc ra chuỗi (string)
+
+                    # Force data types because DictReader always reads strings
                     for key, value in row.items():
                         if key == "target":
                             student_data[key] = value if value else None
@@ -55,15 +55,15 @@ def seed_database():
                             student_data[key] = float(value)
                         else:
                             student_data[key] = int(value)
-                            
+
                     student_objs.append(models.Student(**student_data))
 
-            # Batch insert giúp đẩy hơn 4000 dòng vào DB chỉ trong chưa tới 1 giây
+            # Batch insert helps push more than 4,000 rows into the DB in under 1 second
             db.bulk_save_objects(student_objs)
             db.commit()
-            print(f"[OK] Đã nạp thành công {len(student_objs)} sinh viên vào Database!")
+            print(f"[OK] Successfully imported {len(student_objs)} students into the database!")
         else:
-            print("[INFO] Database đã có sẵn dữ liệu sinh viên.")
+            print("[INFO] The database already contains student data.")
     finally:
         db.close()
 

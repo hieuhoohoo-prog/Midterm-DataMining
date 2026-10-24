@@ -23,7 +23,7 @@ class UserOut(BaseModel):
     role: str
     model_config = ConfigDict(from_attributes=True)
 
-# --- 2. Feature Schemas (Kế thừa theo 3 giai đoạn) ---
+# --- 2. Feature Schemas (Inherited across 3 stages) ---
 class EnrollmentFeatures(BaseModel):
     marital_status: int
     application_mode: int
