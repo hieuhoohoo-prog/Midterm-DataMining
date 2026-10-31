@@ -188,3 +188,9 @@ def get_prediction_history(
         .limit(limit)
         .all()
     )
+
+# ==========================================
+# 4. EXTENDED API (frontend support) - see extended_api.py
+# ==========================================
+from extended_api import router as extended_router
+app.include_router(extended_router)
