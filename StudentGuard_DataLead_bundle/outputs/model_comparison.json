@@ -1,0 +1,98 @@
+[
+  {
+    "model": "Logistic Regression",
+    "accuracy": 0.728814,
+    "precision_weighted": 0.774476,
+    "recall_weighted": 0.728814,
+    "f1_weighted": 0.743413,
+    "precision_macro": 0.704922,
+    "recall_macro": 0.704734,
+    "f1_macro": 0.692742,
+    "confusion_matrix": [
+      [
+        194,
+        66,
+        24
+      ],
+      [
+        24,
+        102,
+        33
+      ],
+      [
+        11,
+        82,
+        349
+      ]
+    ],
+    "class_labels": [
+      "Dropout",
+      "Enrolled",
+      "Graduate"
+    ]
+  },
+  {
+    "model": "Decision Tree",
+    "accuracy": 0.659887,
+    "precision_weighted": 0.670955,
+    "recall_weighted": 0.659887,
+    "f1_weighted": 0.664699,
+    "precision_macro": 0.607034,
+    "recall_macro": 0.608981,
+    "f1_macro": 0.606899,
+    "confusion_matrix": [
+      [
+        181,
+        60,
+        43
+      ],
+      [
+        37,
+        69,
+        53
+      ],
+      [
+        50,
+        58,
+        334
+      ]
+    ],
+    "class_labels": [
+      "Dropout",
+      "Enrolled",
+      "Graduate"
+    ]
+  },
+  {
+    "model": "Random Forest",
+    "accuracy": 0.757062,
+    "precision_weighted": 0.768104,
+    "recall_weighted": 0.757062,
+    "f1_weighted": 0.760291,
+    "precision_macro": 0.714334,
+    "recall_macro": 0.710417,
+    "f1_macro": 0.709529,
+    "confusion_matrix": [
+      [
+        201,
+        47,
+        36
+      ],
+      [
+        28,
+        90,
+        41
+      ],
+      [
+        13,
+        50,
+        379
+      ]
+    ],
+    "class_labels": [
+      "Dropout",
+      "Enrolled",
+      "Graduate"
+    ]
+  }
+]
