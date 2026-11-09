@@ -350,12 +350,17 @@ export const StudentListPage: React.FC = () => {
       </Card>
 
       {/* Main Directory Table */}
-      <Card bordered={false} style={{ borderRadius: 12 }}>
+      <Card
+        bordered={false}
+        style={{ borderRadius: 12, overflow: 'hidden' }}
+        styles={{ body: { padding: '16px 20px' } }}
+      >
         <Table
+          className="sg-directory-table"
           rowKey="student_code"
           loading={loading}
           dataSource={data?.items || []}
-          scroll={{ x: 1150 }}
+          scroll={{ x: 1380 }}
           pagination={{
             current: page,
             pageSize,
@@ -372,7 +377,7 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Student ID',
               dataIndex: 'student_code',
-              width: 110,
+              width: 115,
               fixed: 'left',
               render: (code: string) => (
                 <Button
@@ -387,7 +392,7 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Course / Program',
               dataIndex: 'course_name',
-              width: 225,
+              width: 240,
               render: (name: string, r: StudentListItem) => (
                 <div>
                   <div style={{ fontWeight: 500, color: '#0f172a' }}>
@@ -402,7 +407,7 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Demographics',
               key: 'personal',
-              width: 120,
+              width: 135,
               render: (_: any, r: StudentListItem) => (
                 <div>
                   <Tag style={{ margin: 0 }} color={r.gender === 1 ? 'geekblue' : 'magenta'}>
@@ -417,14 +422,14 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Admission',
               dataIndex: 'admission_grade',
-              width: 95,
+              width: 105,
               align: 'right',
               render: (v: number) => <Text>{v.toFixed(1)}</Text>,
             },
             {
               title: 'Sem 1 (GPA / Passed)',
               key: 'sem1',
-              width: 155,
+              width: 165,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -446,7 +451,7 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Sem 2 (GPA / Passed)',
               key: 'sem2',
-              width: 155,
+              width: 165,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -468,16 +473,16 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Financial Status',
               key: 'finance',
-              width: 190,
+              width: 210,
               render: (_: any, r: StudentListItem) => (
                 <Space size={4} wrap>
                   {r.tuition_fees_up_to_date === 1 ? (
-                    <Tag color="default">Tuition Paid</Tag>
+                    <Tag color="default" style={{ margin: 0 }}>Tuition Paid</Tag>
                   ) : (
-                    <Tag color="error">Tuition Overdue</Tag>
+                    <Tag color="error" style={{ margin: 0 }}>Tuition Overdue</Tag>
                   )}
-                  {r.debtor === 1 && <Tag color="warning">Debtor</Tag>}
-                  {r.scholarship_holder === 1 && <Tag color="success">Scholarship</Tag>}
+                  {r.debtor === 1 && <Tag color="warning" style={{ margin: 0 }}>Debtor</Tag>}
+                  {r.scholarship_holder === 1 && <Tag color="success" style={{ margin: 0 }}>Scholarship</Tag>}
                 </Space>
               ),
             },
@@ -490,7 +495,7 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Latest Risk',
               key: 'risk',
-              width: 165,
+              width: 170,
               render: (_: any, r: StudentListItem) =>
                 renderRiskTag(r.latest_risk_level, r.latest_risk_score),
             },
@@ -498,10 +503,10 @@ export const StudentListPage: React.FC = () => {
               title: 'Actions',
               key: 'actions',
               fixed: 'right',
-              width: 185,
-              align: 'right',
+              width: 215,
+              align: 'center',
               render: (_: any, r: StudentListItem) => (
-                <Space>
+                <Space size={8}>
                   <Button
                     size="small"
                     icon={<EyeOutlined />}

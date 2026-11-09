@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="sgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#sgGrad)" />
+  <!-- University / Classical Building Icon (matches Ant Design BankOutlined) -->
+  <path
+    d="M32 13L13 23v4h38v-4L32 13zm0 4.5L43.2 23H20.8L32 17.5zM17 30v14h4V30h-4zm8.6 0v14h4V30h-4zm8.8 0v14h4V30h-4zM43 30v14h4V30h-4zM13 47v4h38v-4H13z"
+    fill="#ffffff"
+  />
+</svg>
