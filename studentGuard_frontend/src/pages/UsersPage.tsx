@@ -44,7 +44,7 @@ export const UsersPage: React.FC = () => {
       const res = await api.get<UserOut[]>('/api/users');
       setUsers(res.data);
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể tải danh sách tài khoản');
+      message.error(err.response?.data?.detail || 'Failed to load user accounts');
     } finally {
       setLoading(false);
     }
@@ -59,8 +59,8 @@ export const UsersPage: React.FC = () => {
       <Alert
         type="error"
         showIcon
-        message="Không có quyền truy cập"
-        description="Chức năng quản trị tài khoản chỉ dành cho Quản trị viên hệ thống (Admin)."
+        message="Access Denied"
+        description="User management is restricted to System Administrators (Admin)."
       />
     );
   }
@@ -69,12 +69,12 @@ export const UsersPage: React.FC = () => {
     setSubmitting(true);
     try {
       await api.post('/api/users', values);
-      message.success('Đã tạo tài khoản mới thành công!');
+      message.success('User account created successfully!');
       setCreateOpen(false);
       createForm.resetFields();
       fetchUsers();
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể tạo tài khoản');
+      message.error(err.response?.data?.detail || 'Failed to create user account');
     } finally {
       setSubmitting(false);
     }
@@ -92,11 +92,11 @@ export const UsersPage: React.FC = () => {
         payload.password = values.password.trim();
       }
       await api.put(`/api/users/${editUser.id}`, payload);
-      message.success('Đã cập nhật thông tin tài khoản!');
+      message.success('User account updated!');
       setEditUser(null);
       fetchUsers();
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể cập nhật tài khoản');
+      message.error(err.response?.data?.detail || 'Failed to update user account');
     } finally {
       setSubmitting(false);
     }
@@ -105,10 +105,10 @@ export const UsersPage: React.FC = () => {
   const handleDelete = async (u: UserOut) => {
     try {
       await api.delete(`/api/users/${u.id}`);
-      message.success(`Đã xóa tài khoản @${u.username}`);
+      message.success(`Deleted user @${u.username}`);
       fetchUsers();
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể xóa tài khoản');
+      message.error(err.response?.data?.detail || 'Failed to delete user account');
     }
   };
 
@@ -125,11 +125,10 @@ export const UsersPage: React.FC = () => {
       >
         <div>
           <Title level={3} style={{ margin: 0, color: '#0f172a' }}>
-            Quản trị Tài khoản & Phân quyền (RBAC)
+            User Management & Role-Based Access Control (RBAC)
           </Title>
           <Text type="secondary">
-            Cấp phát và quản lý quyền truy cập cho Cố vấn học tập (Academic Advisor) và Quản trị
-            viên (Admin).
+            Provision and manage accounts for Academic Advisors and System Administrators.
           </Text>
         </div>
 
@@ -141,7 +140,7 @@ export const UsersPage: React.FC = () => {
             setCreateOpen(true);
           }}
         >
-          Tạo tài khoản mới
+          Create New User
         </Button>
       </div>
 
@@ -159,25 +158,25 @@ export const UsersPage: React.FC = () => {
               render: (id: number) => `#${id}`,
             },
             {
-              title: 'Tên đăng nhập',
+              title: 'Username',
               dataIndex: 'username',
               render: (u: string) => <Text strong>@{u}</Text>,
             },
             {
-              title: 'Họ và tên cán bộ',
+              title: 'Full Name',
               dataIndex: 'full_name',
             },
             {
-              title: 'Vai trò hệ thống',
+              title: 'System Role',
               dataIndex: 'role',
               render: (role: string) => (
                 <Tag color={role === 'Admin' ? 'blue' : 'cyan'} style={{ fontWeight: 600 }}>
-                  {role === 'Admin' ? 'Quản trị viên (Admin)' : 'Cố vấn Học tập (Academic Advisor)'}
+                  {role === 'Admin' ? 'Administrator (Admin)' : 'Academic Advisor'}
                 </Tag>
               ),
             },
             {
-              title: 'Thao tác',
+              title: 'Actions',
               key: 'actions',
               width: 220,
               align: 'right',
@@ -195,13 +194,13 @@ export const UsersPage: React.FC = () => {
                       });
                     }}
                   >
-                    Sửa
+                    Edit
                   </Button>
                   <Popconfirm
-                    title={`Xác nhận xóa tài khoản @${u.username}?`}
+                    title={`Are you sure you want to delete @${u.username}?`}
                     onConfirm={() => handleDelete(u)}
-                    okText="Xóa"
-                    cancelText="Hủy"
+                    okText="Delete"
+                    cancelText="Cancel"
                     disabled={u.id === currentUser?.id}
                   >
                     <Button
@@ -210,7 +209,7 @@ export const UsersPage: React.FC = () => {
                       icon={<DeleteOutlined />}
                       disabled={u.id === currentUser?.id}
                     >
-                      Xóa
+                      Delete
                     </Button>
                   </Popconfirm>
                 </Space>
@@ -222,7 +221,7 @@ export const UsersPage: React.FC = () => {
 
       {/* Create User Modal */}
       <Modal
-        title="Tạo Tài khoản Cán bộ Mới"
+        title="Create New Staff Account"
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         footer={null}
@@ -236,44 +235,44 @@ export const UsersPage: React.FC = () => {
         >
           <Form.Item
             name="username"
-            label="Tên đăng nhập"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
+            label="Username"
+            rules={[{ required: true, message: 'Please enter a username' }]}
           >
-            <Input placeholder="Ví dụ: advisor02" />
+            <Input placeholder="e.g., advisor02" />
           </Form.Item>
           <Form.Item
             name="full_name"
-            label="Họ và tên đầy đủ"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+            label="Full Name"
+            rules={[{ required: true, message: 'Please enter full name' }]}
           >
-            <Input placeholder="Ví dụ: ThS. Nguyễn Văn A" />
+            <Input placeholder="e.g., Dr. Jane Doe" />
           </Form.Item>
           <Form.Item
             name="role"
-            label="Vai trò phân quyền"
-            rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
+            label="System Role"
+            rules={[{ required: true, message: 'Please select a role' }]}
           >
             <Select
               options={[
-                { value: 'Academic Advisor', label: 'Cố vấn Học tập (Academic Advisor)' },
-                { value: 'Admin', label: 'Quản trị viên hệ thống (Admin)' },
+                { value: 'Academic Advisor', label: 'Academic Advisor' },
+                { value: 'Admin', label: 'System Administrator (Admin)' },
               ]}
             />
           </Form.Item>
           <Form.Item
             name="password"
-            label="Mật khẩu khởi tạo"
+            label="Initial Password"
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu' },
-              { min: 6, message: 'Mật khẩu tối thiểu 6 ký tự' },
+              { required: true, message: 'Please enter a password' },
+              { min: 6, message: 'Password must be at least 6 characters' },
             ]}
           >
-            <Input.Password placeholder="Nhập mật khẩu khởi tạo" />
+            <Input.Password placeholder="Enter initial password" />
           </Form.Item>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button onClick={() => setCreateOpen(false)}>Hủy</Button>
+            <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" icon={<PlusOutlined />} loading={submitting}>
-              Tạo tài khoản
+              Create Account
             </Button>
           </div>
         </Form>
@@ -281,7 +280,7 @@ export const UsersPage: React.FC = () => {
 
       {/* Edit User Modal */}
       <Modal
-        title={`Cập nhật Tài khoản @${editUser?.username}`}
+        title={`Edit Account @${editUser?.username}`}
         open={!!editUser}
         onCancel={() => setEditUser(null)}
         footer={null}
@@ -290,34 +289,34 @@ export const UsersPage: React.FC = () => {
         <Form form={editForm} layout="vertical" onFinish={handleUpdate}>
           <Form.Item
             name="full_name"
-            label="Họ và tên đầy đủ"
-            rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+            label="Full Name"
+            rules={[{ required: true, message: 'Please enter full name' }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="role"
-            label="Vai trò phân quyền"
-            rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
+            label="System Role"
+            rules={[{ required: true, message: 'Please select a role' }]}
           >
             <Select
               disabled={editUser?.id === currentUser?.id}
               options={[
-                { value: 'Academic Advisor', label: 'Cố vấn Học tập (Academic Advisor)' },
-                { value: 'Admin', label: 'Quản trị viên hệ thống (Admin)' },
+                { value: 'Academic Advisor', label: 'Academic Advisor' },
+                { value: 'Admin', label: 'System Administrator (Admin)' },
               ]}
             />
           </Form.Item>
           <Form.Item
             name="password"
-            label="Đặt lại mật khẩu mới (Để trống nếu giữ nguyên mật khẩu cũ)"
+            label="Reset Password (leave blank to keep existing password)"
           >
-            <Input.Password placeholder="Nhập mật khẩu mới nếu cần đổi" />
+            <Input.Password placeholder="Enter new password if resetting" />
           </Form.Item>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button onClick={() => setEditUser(null)}>Hủy</Button>
+            <Button onClick={() => setEditUser(null)}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={submitting}>
-              Lưu thay đổi
+              Save Changes
             </Button>
           </div>
         </Form>
@@ -325,4 +324,3 @@ export const UsersPage: React.FC = () => {
     </Space>
   );
 };
-

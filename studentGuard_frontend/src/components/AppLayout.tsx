@@ -70,7 +70,7 @@ export const AppLayout: React.FC = () => {
             <div>
               <Text strong>{item.student_code}</Text>
               <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
-                {item.course_name || `Ngành #${item.course}`} · {item.age_at_enrollment} tuổi
+                {item.course_name || `Course #${item.course}`} · Age {item.age_at_enrollment}
               </Text>
             </div>
             {renderTargetTag(item.target)}
@@ -93,11 +93,11 @@ export const AppLayout: React.FC = () => {
     setPwdLoading(true);
     try {
       await api.post('/api/auth/change-password', values);
-      message.success('Đổi mật khẩu thành công!');
+      message.success('Password updated successfully!');
       setPwdModalOpen(false);
       pwdForm.resetFields();
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể đổi mật khẩu');
+      message.error(err.response?.data?.detail || 'Failed to change password');
     } finally {
       setPwdLoading(false);
     }
@@ -116,29 +116,29 @@ export const AppLayout: React.FC = () => {
     {
       key: '/',
       icon: <DashboardOutlined />,
-      label: 'Tổng quan Đào tạo',
+      label: 'Academic Overview',
     },
     {
       key: '/students',
       icon: <SolutionOutlined />,
-      label: 'Hồ sơ Sinh viên',
+      label: 'Student Directory',
     },
     {
       key: '/predict',
       icon: <AlertOutlined />,
-      label: 'Đánh giá & Cảnh báo',
+      label: 'Risk Assessment',
     },
     {
       key: '/predictions',
       icon: <HistoryOutlined />,
-      label: 'Nhật ký Đánh giá',
+      label: 'Prediction Logs',
     },
     ...(user?.role === 'Admin'
       ? [
           {
             key: '/users',
             icon: <TeamOutlined />,
-            label: 'Quản trị Tài khoản',
+            label: 'User Management',
           },
         ]
       : []),
@@ -168,7 +168,7 @@ export const AppLayout: React.FC = () => {
             height: 64,
             display: 'flex',
             alignItems: 'center',
-            padding: collapsed ? '0 20px' : '0 20px',
+            padding: '0 20px',
             gap: 12,
             cursor: 'pointer',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -197,7 +197,7 @@ export const AppLayout: React.FC = () => {
                 StudentGuard
               </div>
               <div style={{ color: '#94a3b8', fontSize: 11, fontWeight: 500 }}>
-                CỔNG QUẢN LÝ HỌC VỤ SIS
+                ACADEMIC SIS PORTAL
               </div>
             </div>
           )}
@@ -231,10 +231,10 @@ export const AppLayout: React.FC = () => {
             }}
           >
             <div style={{ color: '#e2e8f0', fontSize: 12, fontWeight: 600 }}>
-              Học kỳ I · 2026–2027
+              Fall Semester · 2026–2027
             </div>
             <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>
-              UCI Dataset #697 · 4,424 hồ sơ
+              UCI Dataset #697 · 4,424 Students
             </div>
           </div>
         )}
@@ -271,7 +271,7 @@ export const AppLayout: React.FC = () => {
             >
               <Input
                 prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-                placeholder="Tra cứu nhanh mã SV (VD: SV0001) hoặc ngành học..."
+                placeholder="Quick search by Student ID (e.g., SV0001) or Program..."
                 allowClear
                 onPressEnter={() => {
                   if (searchValue.trim()) {
@@ -284,9 +284,12 @@ export const AppLayout: React.FC = () => {
           </Space>
 
           <Space size={16}>
-            <Badge status="processing" text={<Text type="secondary" style={{ fontSize: 13 }}>Hệ thống trực tuyến</Text>} />
+            <Badge
+              status="processing"
+              text={<Text type="secondary" style={{ fontSize: 13 }}>System Online</Text>}
+            />
             <Tag color={user?.role === 'Admin' ? 'blue' : 'cyan'} style={{ margin: 0, fontWeight: 600 }}>
-              {user?.role === 'Admin' ? 'Quản trị viên (Admin)' : 'Cố vấn Học tập'}
+              {user?.role === 'Admin' ? 'Administrator' : 'Academic Advisor'}
             </Tag>
             <Dropdown
               menu={{
@@ -294,7 +297,7 @@ export const AppLayout: React.FC = () => {
                   {
                     key: 'pwd',
                     icon: <KeyOutlined />,
-                    label: 'Đổi mật khẩu',
+                    label: 'Change Password',
                     onClick: () => setPwdModalOpen(true),
                   },
                   { type: 'divider' },
@@ -302,7 +305,7 @@ export const AppLayout: React.FC = () => {
                     key: 'logout',
                     icon: <LogoutOutlined />,
                     danger: true,
-                    label: 'Đăng xuất',
+                    label: 'Sign Out',
                     onClick: () => {
                       logout();
                       navigate('/login');
@@ -336,7 +339,7 @@ export const AppLayout: React.FC = () => {
       </Layout>
 
       <Modal
-        title="Đổi mật khẩu tài khoản"
+        title="Change Account Password"
         open={pwdModalOpen}
         onCancel={() => setPwdModalOpen(false)}
         footer={null}
@@ -345,25 +348,25 @@ export const AppLayout: React.FC = () => {
         <Form form={pwdForm} layout="vertical" onFinish={handleChangePassword}>
           <Form.Item
             name="old_password"
-            label="Mật khẩu hiện tại"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại' }]}
+            label="Current Password"
+            rules={[{ required: true, message: 'Please enter your current password' }]}
           >
-            <Input.Password placeholder="Nhập mật khẩu cũ" />
+            <Input.Password placeholder="Enter current password" />
           </Form.Item>
           <Form.Item
             name="new_password"
-            label="Mật khẩu mới (tối thiểu 6 ký tự)"
+            label="New Password (minimum 6 characters)"
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu mới' },
-              { min: 6, message: 'Mật khẩu mới phải từ 6 ký tự trở lên' },
+              { required: true, message: 'Please enter a new password' },
+              { min: 6, message: 'Password must be at least 6 characters' },
             ]}
           >
-            <Input.Password placeholder="Nhập mật khẩu mới" />
+            <Input.Password placeholder="Enter new password" />
           </Form.Item>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button onClick={() => setPwdModalOpen(false)}>Hủy</Button>
+            <Button onClick={() => setPwdModalOpen(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={pwdLoading}>
-              Cập nhật mật khẩu
+              Update Password
             </Button>
           </div>
         </Form>
@@ -371,4 +374,3 @@ export const AppLayout: React.FC = () => {
     </Layout>
   );
 };
-

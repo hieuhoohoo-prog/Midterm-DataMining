@@ -17,12 +17,12 @@ export const MetaFormItems: React.FC<MetaFormItemsProps> = ({ fields, colSpan = 
               <Form.Item
                 name={field.name}
                 label={field.label}
-                rules={[{ required: true, message: `Vui lòng chọn ${field.label.toLowerCase()}` }]}
+                rules={[{ required: true, message: `Please select ${field.label}` }]}
               >
                 <Select
                   showSearch
                   optionFilterProp="label"
-                  placeholder={`Chọn ${field.label.toLowerCase()}`}
+                  placeholder={`Select ${field.label}`}
                   options={(field.options || []).map((opt) => ({
                     value: opt.value,
                     label:
@@ -42,7 +42,7 @@ export const MetaFormItems: React.FC<MetaFormItemsProps> = ({ fields, colSpan = 
             <Form.Item
               name={field.name}
               label={field.label}
-              rules={[{ required: true, message: `Vui lòng nhập ${field.label.toLowerCase()}` }]}
+              rules={[{ required: true, message: `Please enter ${field.label}` }]}
             >
               <InputNumber
                 style={{ width: '100%' }}
@@ -53,7 +53,7 @@ export const MetaFormItems: React.FC<MetaFormItemsProps> = ({ fields, colSpan = 
                 placeholder={
                   field.min != null && field.max != null
                     ? `${field.min} – ${field.max}`
-                    : `Nhập ${field.label.toLowerCase()}`
+                    : `Enter ${field.label}`
                 }
               />
             </Form.Item>
@@ -63,4 +63,3 @@ export const MetaFormItems: React.FC<MetaFormItemsProps> = ({ fields, colSpan = 
     </Row>
   );
 };
-

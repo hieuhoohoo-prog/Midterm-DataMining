@@ -28,7 +28,7 @@ export const LoginPage: React.FC = () => {
     } catch (err: any) {
       setError(
         err.response?.data?.detail ||
-          'Sai tên đăng nhập hoặc mật khẩu. Vui lòng kiểm tra lại.'
+          'Incorrect username or password. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -83,23 +83,24 @@ export const LoginPage: React.FC = () => {
                 StudentGuard SIS
               </div>
               <div style={{ fontSize: 12, color: '#94a3b8', letterSpacing: 0.6 }}>
-                CỔNG THÔNG TIN ĐÀO TẠO & CẢNH BÁO HỌC VỤ SỚM
+                STUDENT INFORMATION & EARLY WARNING SYSTEM
               </div>
             </div>
           </Space>
 
           <div style={{ marginTop: 48, maxWidth: 520 }}>
             <Tag color="blue" style={{ marginBottom: 16, fontWeight: 600 }}>
-              PHÒNG ĐÀO TẠO & CÔNG TÁC SINH VIÊN
+              OFFICE OF ACADEMIC AFFAIRS & STUDENT SUCCESS
             </Tag>
             <Title level={1} style={{ color: '#fff', marginTop: 0, lineHeight: 1.25 }}>
-              Phát hiện sớm rủi ro học tập – Đồng hành kịp thời cùng sinh viên
+              Early Dropout Risk Detection & Proactive Student Advising
             </Title>
             <Paragraph style={{ color: '#cbd5e1', fontSize: 15, lineHeight: 1.7 }}>
-              Hệ thống tích hợp hồ sơ học vụ của <strong>4.424 sinh viên</strong> thuộc 17 ngành
-              đào tạo, hỗ trợ Cố vấn học tập và Ban Quản trị theo dõi tiến độ tín chỉ, tình trạng
-              học phí và dự báo nguy cơ thôi học theo 3 mốc: <em>Nhập học</em>,{' '}
-              <em>Học kỳ 1</em> và <em>Học kỳ 2</em>.
+              Integrated academic records for <strong>4,424 students</strong> across 17
+              undergraduate programs, empowering Academic Advisors and Administrators to monitor
+              credit progression, tuition compliance, and predict dropout risk across three
+              leakage-free stages: <em>Enrollment</em>, <em>Semester 1</em>, and{' '}
+              <em>Semester 2</em>.
             </Paragraph>
           </div>
 
@@ -114,27 +115,27 @@ export const LoginPage: React.FC = () => {
             }}
           >
             <div style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: 10 }}>
-              📌 Thông báo học vụ mới nhất
+              Academic Portal Bulletins
             </div>
             <Space direction="vertical" size={8} style={{ color: '#cbd5e1', fontSize: 13 }}>
               <div>
                 <CheckCircleOutlined style={{ color: '#38bdf8', marginRight: 8 }} />
-                Đã đồng bộ dữ liệu điểm tổng kết Học kỳ 1 & Học kỳ 2 từ bộ dữ liệu chuẩn UCI #697.
+                Synchronized Semester 1 & Semester 2 academic records from UCI Dataset #697.
               </div>
               <div>
                 <CheckCircleOutlined style={{ color: '#38bdf8', marginRight: 8 }} />
-                Mở cổng rà soát danh sách sinh viên nợ học phí và cảnh báo học vụ sớm.
+                Active early-warning screening for students with overdue tuition and low GPA.
               </div>
               <div>
                 <CheckCircleOutlined style={{ color: '#38bdf8', marginRight: 8 }} />
-                Hỗ trợ giải thích yếu tố rủi ro (Explainable AI) và gợi ý hướng tư vấn cho cố vấn.
+                Explainable risk factor breakdown and actionable intervention guidance for advisors.
               </div>
             </Space>
           </div>
         </div>
 
         <div style={{ color: '#64748b', fontSize: 12, marginTop: 32 }}>
-          © 2026 StudentGuard – Đồ án Giữa kỳ môn Khai phá dữ liệu (Data Mining)
+          © 2026 StudentGuard – Data Mining Midterm Project
         </div>
       </div>
 
@@ -160,10 +161,10 @@ export const LoginPage: React.FC = () => {
         >
           <div style={{ marginBottom: 24 }}>
             <Title level={3} style={{ marginBottom: 4, color: '#0f172a' }}>
-              Đăng nhập Hệ thống
+              Sign In to Portal
             </Title>
             <Text type="secondary">
-              Sử dụng tài khoản Cố vấn học tập hoặc Quản trị viên được nhà trường cấp
+              Use your Academic Advisor or Administrator credentials
             </Text>
           </div>
 
@@ -185,18 +186,18 @@ export const LoginPage: React.FC = () => {
           >
             <Form.Item
               name="username"
-              label="Tên đăng nhập"
-              rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
+              label="Username"
+              rules={[{ required: true, message: 'Please enter your username' }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Ví dụ: advisor hoặc admin" />
+              <Input prefix={<UserOutlined />} placeholder="e.g., advisor or admin" />
             </Form.Item>
 
             <Form.Item
               name="password"
-              label="Mật khẩu"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+              label="Password"
+              rules={[{ required: true, message: 'Please enter your password' }]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
+              <Input.Password prefix={<LockOutlined />} placeholder="Enter password" />
             </Form.Item>
 
             <Button
@@ -206,13 +207,13 @@ export const LoginPage: React.FC = () => {
               block
               style={{ height: 44, fontWeight: 600, marginTop: 8 }}
             >
-              Đăng nhập Cổng Đào tạo
+              Sign In
             </Button>
           </Form>
 
           <Divider style={{ margin: '24px 0 16px' }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Tài khoản mẫu để kiểm thử nhanh
+              Quick Demo Accounts
             </Text>
           </Divider>
 
@@ -222,14 +223,14 @@ export const LoginPage: React.FC = () => {
               onClick={() => fillQuickAccount('advisor', 'advisor123')}
               style={{ fontSize: 12 }}
             >
-              Cố vấn (advisor)
+              Advisor (advisor)
             </Button>
             <Button
               icon={<UserOutlined />}
               onClick={() => fillQuickAccount('admin', 'admin123')}
               style={{ fontSize: 12 }}
             >
-              Quản trị (admin)
+              Admin (admin)
             </Button>
           </div>
         </Card>
@@ -237,4 +238,3 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
-

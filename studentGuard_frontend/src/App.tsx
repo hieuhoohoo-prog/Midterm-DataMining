@@ -1,6 +1,6 @@
 import React from 'react';
 import { ConfigProvider, Spin } from 'antd';
-import viVN from 'antd/locale/vi_VN';
+import enUS from 'antd/locale/en_US';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppLayout } from './components/AppLayout';
@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
           justifyContent: 'center',
         }}
       >
-        <Spin size="large" tip="Đang tải dữ liệu hệ thống..." />
+        <Spin size="large" tip="Loading system data..." />
       </div>
     );
   }
@@ -37,7 +37,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 export const App: React.FC = () => {
   return (
     <ConfigProvider
-      locale={viVN}
+      locale={enUS}
       theme={{
         token: {
           colorPrimary: '#2563eb',
@@ -73,4 +73,3 @@ export const App: React.FC = () => {
   );
 };
 export default App;
-
