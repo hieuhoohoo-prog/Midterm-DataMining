@@ -131,13 +131,22 @@ export const DashboardPage: React.FC = () => {
     pct: ((overview.target_rate[key] || 0) * 100).toFixed(1),
   }));
 
-  const barChartData = groupData.map((g) => ({
-    name: g.label || `Code ${g.value}`,
-    total: g.total,
-    'Dropout (%)': Number(((g.rates.Dropout || 0) * 100).toFixed(1)),
-    'Enrolled (%)': Number(((g.rates.Enrolled || 0) * 100).toFixed(1)),
-    'Graduate (%)': Number(((g.rates.Graduate || 0) * 100).toFixed(1)),
-  }));
+  const shortenCategoryLabel = (raw: string) => {
+    const compact = raw.replace(/\band\b/gi, '&');
+    return compact.length > 20 ? `${compact.slice(0, 19).trimEnd()}…` : compact;
+  };
+
+  const barChartData = groupData.map((g) => {
+    const fullName = g.label || `Code ${g.value}`;
+    return {
+      name: groupField === 'course' ? shortenCategoryLabel(fullName) : fullName,
+      fullName,
+      total: g.total,
+      'Dropout (%)': Number(((g.rates.Dropout || 0) * 100).toFixed(1)),
+      'Enrolled (%)': Number(((g.rates.Enrolled || 0) * 100).toFixed(1)),
+      'Graduate (%)': Number(((g.rates.Graduate || 0) * 100).toFixed(1)),
+    };
+  });
 
   const histChartData = histData.map((b) => ({
     range: `${b.start}–${b.end}`,
@@ -297,7 +306,7 @@ export const DashboardPage: React.FC = () => {
             bordered={false}
             style={{ borderRadius: 12, height: '100%' }}
           >
-            <div style={{ width: '100%', height: 290 }}>
+            <div style={{ width: '100%', height: 310 }}>
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
@@ -337,14 +346,36 @@ export const DashboardPage: React.FC = () => {
             bordered={false}
             style={{ borderRadius: 12, height: '100%' }}
           >
-            <div style={{ width: '100%', height: 290 }}>
+            <div style={{ width: '100%', height: 310 }}>
               <ResponsiveContainer>
-                <BarChart data={barChartData} margin={{ top: 10, right: 16, left: 0, bottom: 20 }}>
+                <BarChart
+                  data={barChartData}
+                  margin={{
+                    top: 4,
+                    right: 16,
+                    left: 0,
+                    bottom: groupField === 'course' ? 12 : 4,
+                  }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-12} textAnchor="end" />
+                  <XAxis
+                    dataKey="name"
+                    interval={0}
+                    angle={groupField === 'course' ? -25 : 0}
+                    textAnchor={groupField === 'course' ? 'end' : 'middle'}
+                    height={groupField === 'course' ? 68 : 34}
+                    tickMargin={6}
+                    tick={{ fontSize: groupField === 'course' ? 11 : 12, fill: '#475569' }}
+                  />
                   <YAxis unit="%" tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value: number) => `${value}%`} />
-                  <Legend />
+                  <Tooltip
+                    formatter={(value: number) => `${value}%`}
+                    labelFormatter={(label, payload) => {
+                      const item = payload?.[0]?.payload;
+                      return item?.fullName ? `${item.fullName} (n = ${item.total})` : label;
+                    }}
+                  />
+                  <Legend verticalAlign="top" height={34} />
                   <Bar dataKey="Dropout (%)" fill="#dc2626" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Enrolled (%)" fill="#2563eb" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Graduate (%)" fill="#16a34a" radius={[4, 4, 0, 0]} />
