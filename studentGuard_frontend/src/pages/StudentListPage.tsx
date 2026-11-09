@@ -88,7 +88,7 @@ export const StudentListPage: React.FC = () => {
       });
       setData(res.data);
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể tải danh sách sinh viên');
+      message.error(err.response?.data?.detail || 'Failed to load student directory');
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,6 @@ export const StudentListPage: React.FC = () => {
       ?.options?.map((o) => ({ value: o.value, label: `${o.label} (${o.value})` })) || [];
 
   const openCreateModal = async () => {
-    // Pre-fill defaults from SV0001 so Admin doesn't have to type all 36 fields from scratch
     try {
       const res = await api.get('/api/students/SV0001');
       const { id, student_code, ...rest } = res.data;
@@ -140,16 +139,20 @@ export const StudentListPage: React.FC = () => {
   const handleCreateStudent = async (values: any) => {
     setCreating(true);
     try {
-      const payload = { ...values };
-      if (!payload.student_code || !payload.student_code.trim()) {
-        delete payload.student_code;
+      const allValues = { ...createForm.getFieldsValue(true), ...values };
+      if (!allValues.student_code || !allValues.student_code.trim()) {
+        delete allValues.student_code;
       }
-      const res = await api.post('/api/students', payload);
-      message.success(`Đã tạo hồ sơ sinh viên ${res.data.student_code}`);
+      const res = await api.post('/api/students', allValues);
+      message.success(`Created student record ${res.data.student_code}`);
       setCreateOpen(false);
       navigate(`/students/${res.data.student_code}`);
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể tạo hồ sơ sinh viên');
+      message.error(
+        typeof err.response?.data?.detail === 'string'
+          ? err.response.data.detail
+          : 'Failed to create student record'
+      );
     } finally {
       setCreating(false);
     }
@@ -174,16 +177,16 @@ export const StudentListPage: React.FC = () => {
       >
         <div>
           <Title level={3} style={{ margin: 0, color: '#0f172a' }}>
-            Quản lý Hồ sơ Sinh viên
+            Student Directory
           </Title>
           <Text type="secondary">
-            Tra cứu, lọc theo ngành đào tạo, tình trạng đóng học phí, kết quả học tập và mức độ
-            nguy cơ học vụ.
+            Search and filter student records by program, tuition compliance, academic grades, and
+            evaluated dropout risk.
           </Text>
         </div>
         {user?.role === 'Admin' && (
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-            Thêm hồ sơ sinh viên
+            Add Student Record
           </Button>
         )}
       </div>
@@ -194,7 +197,7 @@ export const StudentListPage: React.FC = () => {
           <Col xs={24} md={7}>
             <Input
               prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="Tìm mã SV (SV0001...) hoặc tên ngành..."
+              placeholder="Search by Student ID (SV0001...) or Program..."
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -209,7 +212,7 @@ export const StudentListPage: React.FC = () => {
               allowClear
               showSearch
               optionFilterProp="label"
-              placeholder="Ngành đào tạo (17 ngành)"
+              placeholder="Course / Program (17 programs)"
               style={{ width: '100%' }}
               value={course}
               onChange={(v) => {
@@ -223,7 +226,7 @@ export const StudentListPage: React.FC = () => {
           <Col xs={12} sm={6} md={4}>
             <Select
               allowClear
-              placeholder="Trạng thái học vụ"
+              placeholder="Academic Outcome"
               style={{ width: '100%' }}
               value={target}
               onChange={(v) => {
@@ -231,9 +234,9 @@ export const StudentListPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 'Dropout', label: '🔴 Thôi học (Dropout)' },
-                { value: 'Enrolled', label: '🔵 Đang học (Enrolled)' },
-                { value: 'Graduate', label: '🟢 Tốt nghiệp (Graduate)' },
+                { value: 'Dropout', label: 'Dropout' },
+                { value: 'Enrolled', label: 'Enrolled' },
+                { value: 'Graduate', label: 'Graduate' },
               ]}
             />
           </Col>
@@ -241,7 +244,7 @@ export const StudentListPage: React.FC = () => {
           <Col xs={12} sm={6} md={4}>
             <Select
               allowClear
-              placeholder="Tình trạng học phí"
+              placeholder="Tuition Status"
               style={{ width: '100%' }}
               value={tuition}
               onChange={(v) => {
@@ -249,8 +252,8 @@ export const StudentListPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 1, label: 'Đóng đúng hạn' },
-                { value: 0, label: 'Chưa đóng / Trễ hạn' },
+                { value: 1, label: 'Up to date' },
+                { value: 0, label: 'Overdue' },
               ]}
             />
           </Col>
@@ -258,7 +261,7 @@ export const StudentListPage: React.FC = () => {
           <Col xs={12} sm={6} md={3}>
             <Select
               allowClear
-              placeholder="Công nợ"
+              placeholder="Debtor"
               style={{ width: '100%' }}
               value={debtor}
               onChange={(v) => {
@@ -266,8 +269,8 @@ export const StudentListPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 1, label: 'Đang nợ' },
-                { value: 0, label: 'Không nợ' },
+                { value: 1, label: 'Debtor' },
+                { value: 0, label: 'No Debt' },
               ]}
             />
           </Col>
@@ -275,7 +278,7 @@ export const StudentListPage: React.FC = () => {
           <Col xs={12} sm={6} md={4}>
             <Select
               allowClear
-              placeholder="Học bổng"
+              placeholder="Scholarship"
               style={{ width: '100%' }}
               value={scholarship}
               onChange={(v) => {
@@ -283,8 +286,8 @@ export const StudentListPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 1, label: 'Có học bổng' },
-                { value: 0, label: 'Không học bổng' },
+                { value: 1, label: 'Scholarship Holder' },
+                { value: 0, label: 'No Scholarship' },
               ]}
             />
           </Col>
@@ -292,7 +295,7 @@ export const StudentListPage: React.FC = () => {
           <Col xs={12} sm={6} md={4}>
             <Select
               allowClear
-              placeholder="Mức rủi ro đã đánh giá"
+              placeholder="Evaluated Risk Level"
               style={{ width: '100%' }}
               value={riskLevel}
               onChange={(v) => {
@@ -300,9 +303,9 @@ export const StudentListPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 'High', label: 'Nguy cơ Cao' },
-                { value: 'Medium', label: 'Nguy cơ Vừa' },
-                { value: 'Low', label: 'Nguy cơ Thấp' },
+                { value: 'High', label: 'High Risk' },
+                { value: 'Medium', label: 'Medium Risk' },
+                { value: 'Low', label: 'Low Risk' },
               ]}
             />
           </Col>
@@ -314,11 +317,11 @@ export const StudentListPage: React.FC = () => {
                 onChange={setSortBy}
                 style={{ width: '68%' }}
                 options={[
-                  { value: 'student_code', label: 'Sắp xếp: Mã SV' },
-                  { value: 'admission_grade', label: 'Sắp xếp: Điểm đầu vào' },
-                  { value: 'curricular_units_1st_sem_grade', label: 'Sắp xếp: Điểm TB HK1' },
-                  { value: 'curricular_units_2nd_sem_grade', label: 'Sắp xếp: Điểm TB HK2' },
-                  { value: 'age_at_enrollment', label: 'Sắp xếp: Tuổi nhập học' },
+                  { value: 'student_code', label: 'Sort: Student ID' },
+                  { value: 'admission_grade', label: 'Sort: Admission Grade' },
+                  { value: 'curricular_units_1st_sem_grade', label: 'Sort: Sem 1 Grade' },
+                  { value: 'curricular_units_2nd_sem_grade', label: 'Sort: Sem 2 Grade' },
+                  { value: 'age_at_enrollment', label: 'Sort: Age' },
                 ]}
               />
               <Select
@@ -326,8 +329,8 @@ export const StudentListPage: React.FC = () => {
                 onChange={setOrder}
                 style={{ width: '32%' }}
                 options={[
-                  { value: 'asc', label: 'Tăng ↑' },
-                  { value: 'desc', label: 'Giảm ↓' },
+                  { value: 'asc', label: 'Asc ↑' },
+                  { value: 'desc', label: 'Desc ↓' },
                 ]}
               />
             </Space.Compact>
@@ -336,10 +339,10 @@ export const StudentListPage: React.FC = () => {
           <Col xs={24} sm={8} md={10} style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Space>
               <Tag icon={<FilterOutlined />} color="blue" style={{ padding: '4px 10px' }}>
-                Tổng kết quả: <strong>{data?.total?.toLocaleString() ?? 0}</strong> sinh viên
+                Matching Records: <strong>{data?.total?.toLocaleString() ?? 0}</strong> students
               </Tag>
               <Button icon={<ReloadOutlined />} onClick={handleResetFilters}>
-                Đặt lại bộ lọc
+                Reset Filters
               </Button>
             </Space>
           </Col>
@@ -359,7 +362,7 @@ export const StudentListPage: React.FC = () => {
             total: data?.total || 0,
             showSizeChanger: true,
             pageSizeOptions: ['10', '20', '50', '100'],
-            showTotal: (total, range) => `${range[0]}–${range[1]} trên ${total.toLocaleString()} SV`,
+            showTotal: (total, range) => `${range[0]}–${range[1]} of ${total.toLocaleString()} students`,
             onChange: (p, ps) => {
               setPage(p);
               setPageSize(ps);
@@ -367,9 +370,9 @@ export const StudentListPage: React.FC = () => {
           }}
           columns={[
             {
-              title: 'Mã SV',
+              title: 'Student ID',
               dataIndex: 'student_code',
-              width: 105,
+              width: 110,
               fixed: 'left',
               render: (code: string) => (
                 <Button
@@ -382,46 +385,46 @@ export const StudentListPage: React.FC = () => {
               ),
             },
             {
-              title: 'Ngành đào tạo',
+              title: 'Course / Program',
               dataIndex: 'course_name',
-              width: 220,
+              width: 225,
               render: (name: string, r: StudentListItem) => (
                 <div>
                   <div style={{ fontWeight: 500, color: '#0f172a' }}>
-                    {name || `Ngành #${r.course}`}
+                    {name || `Course #${r.course}`}
                   </div>
                   <div style={{ fontSize: 11, color: '#64748b' }}>
-                    Mã ngành: {r.course} · {r.daytime_evening_attendance === 1 ? 'Ban ngày' : 'Buổi tối'}
+                    Code: {r.course} · {r.daytime_evening_attendance === 1 ? 'Daytime' : 'Evening'}
                   </div>
                 </div>
               ),
             },
             {
-              title: 'Cá nhân',
+              title: 'Demographics',
               key: 'personal',
-              width: 115,
+              width: 120,
               render: (_: any, r: StudentListItem) => (
                 <div>
                   <Tag style={{ margin: 0 }} color={r.gender === 1 ? 'geekblue' : 'magenta'}>
-                    {r.gender === 1 ? 'Nam' : 'Nữ'}
+                    {r.gender === 1 ? 'Male' : 'Female'}
                   </Tag>
                   <span style={{ marginLeft: 6, fontSize: 12, color: '#475569' }}>
-                    {r.age_at_enrollment} tuổi
+                    Age {r.age_at_enrollment}
                   </span>
                 </div>
               ),
             },
             {
-              title: 'Đầu vào',
+              title: 'Admission',
               dataIndex: 'admission_grade',
               width: 95,
               align: 'right',
               render: (v: number) => <Text>{v.toFixed(1)}</Text>,
             },
             {
-              title: 'Học kỳ 1 (Điểm / Đạt)',
+              title: 'Sem 1 (GPA / Passed)',
               key: 'sem1',
-              width: 145,
+              width: 155,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -435,15 +438,15 @@ export const StudentListPage: React.FC = () => {
                   </Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {' '}
-                    ({r.curricular_units_1st_sem_approved} môn)
+                    ({r.curricular_units_1st_sem_approved} units)
                   </Text>
                 </div>
               ),
             },
             {
-              title: 'Học kỳ 2 (Điểm / Đạt)',
+              title: 'Sem 2 (GPA / Passed)',
               key: 'sem2',
-              width: 145,
+              width: 155,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -457,42 +460,42 @@ export const StudentListPage: React.FC = () => {
                   </Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {' '}
-                    ({r.curricular_units_2nd_sem_approved} môn)
+                    ({r.curricular_units_2nd_sem_approved} units)
                   </Text>
                 </div>
               ),
             },
             {
-              title: 'Tài chính & Học bổng',
+              title: 'Financial Status',
               key: 'finance',
-              width: 185,
+              width: 190,
               render: (_: any, r: StudentListItem) => (
                 <Space size={4} wrap>
                   {r.tuition_fees_up_to_date === 1 ? (
-                    <Tag color="default">Đủ học phí</Tag>
+                    <Tag color="default">Tuition Paid</Tag>
                   ) : (
-                    <Tag color="error">Trễ học phí</Tag>
+                    <Tag color="error">Tuition Overdue</Tag>
                   )}
-                  {r.debtor === 1 && <Tag color="warning">Đang nợ</Tag>}
-                  {r.scholarship_holder === 1 && <Tag color="success">Học bổng</Tag>}
+                  {r.debtor === 1 && <Tag color="warning">Debtor</Tag>}
+                  {r.scholarship_holder === 1 && <Tag color="success">Scholarship</Tag>}
                 </Space>
               ),
             },
             {
-              title: 'Trạng thái học vụ',
+              title: 'Outcome',
               dataIndex: 'target',
               width: 130,
               render: (t: string) => renderTargetTag(t),
             },
             {
-              title: 'Đánh giá gần nhất',
+              title: 'Latest Risk',
               key: 'risk',
               width: 165,
               render: (_: any, r: StudentListItem) =>
                 renderRiskTag(r.latest_risk_level, r.latest_risk_score),
             },
             {
-              title: 'Thao tác',
+              title: 'Actions',
               key: 'actions',
               fixed: 'right',
               width: 185,
@@ -504,7 +507,7 @@ export const StudentListPage: React.FC = () => {
                     icon={<EyeOutlined />}
                     onClick={() => navigate(`/students/${r.student_code}`)}
                   >
-                    Hồ sơ
+                    Profile
                   </Button>
                   <Button
                     size="small"
@@ -513,7 +516,7 @@ export const StudentListPage: React.FC = () => {
                     icon={<AlertOutlined />}
                     onClick={() => navigate(`/predict?student=${r.student_code}`)}
                   >
-                    Dự đoán
+                    Evaluate
                   </Button>
                 </Space>
               ),
@@ -524,7 +527,7 @@ export const StudentListPage: React.FC = () => {
 
       {/* Admin Create Student Modal */}
       <Modal
-        title="Thêm Hồ sơ Sinh viên Mới (Quản trị viên)"
+        title="Add New Student Record (Administrator)"
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         width={960}
@@ -536,19 +539,19 @@ export const StudentListPage: React.FC = () => {
             <Col xs={24} sm={12}>
               <Form.Item
                 name="student_code"
-                label="Mã sinh viên (Để trống hệ thống sẽ tự sinh mã SVxxxx tiếp theo)"
+                label="Student ID (Leave blank to auto-generate next SVxxxx code)"
               >
-                <Input placeholder="Ví dụ: SV4425 (hoặc để trống)" />
+                <Input placeholder="e.g., SV4425 (or leave blank)" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="target" label="Trạng thái học vụ hiện tại">
+              <Form.Item name="target" label="Current Academic Outcome">
                 <Select
                   allowClear
                   options={[
-                    { value: 'Enrolled', label: 'Đang theo học (Enrolled)' },
-                    { value: 'Graduate', label: 'Tốt nghiệp (Graduate)' },
-                    { value: 'Dropout', label: 'Thôi học (Dropout)' },
+                    { value: 'Enrolled', label: 'Enrolled' },
+                    { value: 'Graduate', label: 'Graduate' },
+                    { value: 'Dropout', label: 'Dropout' },
                   ]}
                 />
               </Form.Item>
@@ -559,15 +562,16 @@ export const StudentListPage: React.FC = () => {
             defaultActiveKey={['personal', 'admission', 'financial']}
             items={Object.entries(groupedFields).map(([grp, fields]) => ({
               key: grp,
+              forceRender: true,
               label: <strong>{GROUP_LABELS[grp] || grp}</strong>,
               children: <MetaFormItems fields={fields} colSpan={8} />,
             }))}
           />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-            <Button onClick={() => setCreateOpen(false)}>Hủy</Button>
+            <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={creating}>
-              Lưu hồ sơ sinh viên
+              Save Student Record
             </Button>
           </div>
         </Form>
@@ -575,4 +579,3 @@ export const StudentListPage: React.FC = () => {
     </Space>
   );
 };
-

@@ -8,53 +8,53 @@ import {
 } from '@ant-design/icons';
 
 export const STAGE_LABELS: Record<string, string> = {
-  enrollment: 'Khi nhập học',
-  semester_1: 'Sau Học kỳ 1',
-  semester_2: 'Sau Học kỳ 2',
+  enrollment: 'At Enrollment',
+  semester_1: 'After Semester 1',
+  semester_2: 'After Semester 2',
 };
 
 export const TARGET_LABELS: Record<string, string> = {
-  Graduate: 'Tốt nghiệp (Graduate)',
-  Enrolled: 'Đang theo học (Enrolled)',
-  Dropout: 'Thôi học (Dropout)',
+  Graduate: 'Graduate',
+  Enrolled: 'Enrolled',
+  Dropout: 'Dropout',
 };
 
 export const TARGET_SHORT_LABELS: Record<string, string> = {
-  Graduate: 'Tốt nghiệp',
-  Enrolled: 'Đang học',
-  Dropout: 'Thôi học',
+  Graduate: 'Graduate',
+  Enrolled: 'Enrolled',
+  Dropout: 'Dropout',
 };
 
 export const GROUP_LABELS: Record<string, string> = {
-  personal: 'Thông tin cá nhân & Nhân khẩu học',
-  family: 'Gia đình & Nền tảng phụ huynh',
-  admission: 'Tuyển sinh & Trình độ đầu vào',
-  financial: 'Tài chính & Học bổng',
-  macro: 'Chỉ số Kinh tế Vĩ mô',
-  semester_1: 'Kết quả Học tập – Học kỳ 1',
-  semester_2: 'Kết quả Học tập – Học kỳ 2',
+  personal: 'Personal & Demographic Profile',
+  family: 'Family & Parental Background',
+  admission: 'Admission & Prior Qualification',
+  financial: 'Financial & Scholarship Status',
+  macro: 'Macroeconomic Indicators',
+  semester_1: 'Academic Performance – Semester 1',
+  semester_2: 'Academic Performance – Semester 2',
 };
 
 export const renderTargetTag = (target?: string | null) => {
-  if (!target) return <Tag>Chưa xác định</Tag>;
+  if (!target) return <Tag>Unknown</Tag>;
   if (target === 'Graduate') {
     return (
       <Tag icon={<CheckCircleFilled />} color="success" style={{ fontWeight: 500 }}>
-        Tốt nghiệp
+        Graduate
       </Tag>
     );
   }
   if (target === 'Enrolled') {
     return (
       <Tag icon={<ClockCircleFilled />} color="processing" style={{ fontWeight: 500 }}>
-        Đang học
+        Enrolled
       </Tag>
     );
   }
   if (target === 'Dropout') {
     return (
       <Tag icon={<ExclamationCircleFilled />} color="error" style={{ fontWeight: 500 }}>
-        Thôi học
+        Dropout
       </Tag>
     );
   }
@@ -63,26 +63,26 @@ export const renderTargetTag = (target?: string | null) => {
 
 export const renderRiskTag = (level?: string | null, score?: number | null) => {
   if (!level) {
-    return <Tag color="default">Chưa đánh giá</Tag>;
+    return <Tag color="default">Not Evaluated</Tag>;
   }
   const pct = score != null ? ` (${Math.round(score * 100)}%)` : '';
   if (level === 'High') {
     return (
       <Tag icon={<ExclamationCircleFilled />} color="#dc2626" style={{ fontWeight: 600 }}>
-        Nguy cơ Cao{pct}
+        High Risk{pct}
       </Tag>
     );
   }
   if (level === 'Medium') {
     return (
       <Tag icon={<WarningFilled />} color="#d97706" style={{ fontWeight: 600 }}>
-        Nguy cơ Vừa{pct}
+        Medium Risk{pct}
       </Tag>
     );
   }
   return (
     <Tag icon={<CheckCircleFilled />} color="#16a34a" style={{ fontWeight: 600 }}>
-      Nguy cơ Thấp{pct}
+      Low Risk{pct}
     </Tag>
   );
 };
@@ -94,12 +94,11 @@ export const RiskGauge: React.FC<{ score: number; level: string }> = ({ score, l
     level === 'High' ? '#dc2626' : level === 'Medium' ? '#d97706' : '#16a34a';
   const label =
     level === 'High'
-      ? 'Cần can thiệp học vụ ngay'
+      ? 'Immediate Academic Intervention Required'
       : level === 'Medium'
-      ? 'Cần theo dõi & nhắc nhở'
-      : 'Tiến độ học tập ổn định';
+      ? 'Requires Active Monitoring & Check-in'
+      : 'On Track – Stable Academic Progress';
 
-  // Semi-circle SVG arc calculation
   const radius = 78;
   const circumference = Math.PI * radius;
   const dashOffset = circumference * (1 - clamped);
@@ -138,7 +137,7 @@ export const RiskGauge: React.FC<{ score: number; level: string }> = ({ score, l
           textAnchor="middle"
           style={{ fontSize: 12, fontWeight: 600, fill: color }}
         >
-           Điểm rủi ro: {score.toFixed(2)}
+          Risk Score: {score.toFixed(2)}
         </text>
       </svg>
       <div style={{ marginTop: 4 }}>{renderRiskTag(level)}</div>
@@ -146,4 +145,3 @@ export const RiskGauge: React.FC<{ score: number; level: string }> = ({ score, l
     </div>
   );
 };
-

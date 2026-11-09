@@ -58,19 +58,19 @@ const TARGET_COLORS: Record<string, string> = {
 };
 
 const GROUP_FIELD_OPTIONS = [
-  { value: 'tuition_fees_up_to_date', label: 'Tình trạng đóng học phí' },
-  { value: 'debtor', label: 'Tình trạng công nợ' },
-  { value: 'scholarship_holder', label: ' Diện nhận học bổng' },
-  { value: 'gender', label: 'Giới tính' },
-  { value: 'daytime_evening_attendance', label: 'Ca học (Ban ngày / Buổi tối)' },
-  { value: 'course', label: 'Ngành đào tạo (Top ngành)' },
+  { value: 'tuition_fees_up_to_date', label: 'Tuition Payment Status' },
+  { value: 'debtor', label: 'Debtor Status' },
+  { value: 'scholarship_holder', label: 'Scholarship Status' },
+  { value: 'gender', label: 'Gender' },
+  { value: 'daytime_evening_attendance', label: 'Attendance Regime (Daytime / Evening)' },
+  { value: 'course', label: 'Course / Program (Top Courses)' },
 ];
 
 const HISTOGRAM_FIELD_OPTIONS = [
-  { value: 'curricular_units_1st_sem_grade', label: 'Điểm TB Học kỳ 1 (0–20)' },
-  { value: 'curricular_units_2nd_sem_grade', label: 'Điểm TB Học kỳ 2 (0–20)' },
-  { value: 'admission_grade', label: 'Điểm trúng tuyển đầu vào (0–200)' },
-  { value: 'age_at_enrollment', label: 'Độ tuổi khi nhập học' },
+  { value: 'curricular_units_1st_sem_grade', label: 'Sem 1 Grade Avg (0–20)' },
+  { value: 'curricular_units_2nd_sem_grade', label: 'Sem 2 Grade Avg (0–20)' },
+  { value: 'admission_grade', label: 'Admission Grade (0–200)' },
+  { value: 'age_at_enrollment', label: 'Age at Enrollment' },
 ];
 
 export const DashboardPage: React.FC = () => {
@@ -132,18 +132,18 @@ export const DashboardPage: React.FC = () => {
   }));
 
   const barChartData = groupData.map((g) => ({
-    name: g.label || `Mã ${g.value}`,
+    name: g.label || `Code ${g.value}`,
     total: g.total,
-    'Thôi học (%)': Number(((g.rates.Dropout || 0) * 100).toFixed(1)),
-    'Đang học (%)': Number(((g.rates.Enrolled || 0) * 100).toFixed(1)),
-    'Tốt nghiệp (%)': Number(((g.rates.Graduate || 0) * 100).toFixed(1)),
+    'Dropout (%)': Number(((g.rates.Dropout || 0) * 100).toFixed(1)),
+    'Enrolled (%)': Number(((g.rates.Enrolled || 0) * 100).toFixed(1)),
+    'Graduate (%)': Number(((g.rates.Graduate || 0) * 100).toFixed(1)),
   }));
 
   const histChartData = histData.map((b) => ({
     range: `${b.start}–${b.end}`,
-    'Thôi học': b.counts.Dropout || 0,
-    'Đang học': b.counts.Enrolled || 0,
-    'Tốt nghiệp': b.counts.Graduate || 0,
+    Dropout: b.counts.Dropout || 0,
+    Enrolled: b.counts.Enrolled || 0,
+    Graduate: b.counts.Graduate || 0,
   }));
 
   return (
@@ -160,23 +160,23 @@ export const DashboardPage: React.FC = () => {
       >
         <div>
           <Title level={3} style={{ margin: 0, color: '#0f172a' }}>
-            Bảng điều khiển Học vụ & Cảnh báo sớm
+            Academic Overview & Early Warning Dashboard
           </Title>
           <Text type="secondary">
-            Tổng hợp dữ liệu đào tạo toàn trường, phân tích yếu tố rủi ro bỏ học và danh sách sinh
-            viên cần cố vấn hỗ trợ.
+            Institution-wide enrollment analytics, dropout risk drivers, and prioritized student
+            intervention queue.
           </Text>
         </div>
         <Space>
           <Button icon={<FileSearchOutlined />} onClick={() => navigate('/students')}>
-            Danh sách sinh viên
+            Student Directory
           </Button>
           <Button
             type="primary"
             icon={<AlertOutlined />}
             onClick={() => navigate('/predict')}
           >
-            Đánh giá nguy cơ học vụ
+            Risk Assessment Tool
           </Button>
         </Space>
       </div>
@@ -186,13 +186,13 @@ export const DashboardPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <Statistic
-              title={<Text type="secondary">Tổng quy mô Sinh viên</Text>}
+              title={<Text type="secondary">Total Student Population</Text>}
               value={overview.total_students}
               prefix={<TeamOutlined style={{ color: '#2563eb' }} />}
-              suffix={<Text type="secondary" style={{ fontSize: 13 }}>/ {overview.total_courses} ngành</Text>}
+              suffix={<Text type="secondary" style={{ fontSize: 13 }}>/ {overview.total_courses} programs</Text>}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Điểm TB đầu vào: <strong>{overview.averages.admission_grade}</strong>/200 · Tuổi TB:{' '}
+              Mean Admission: <strong>{overview.averages.admission_grade}</strong>/200 · Mean Age:{' '}
               <strong>{overview.averages.age_at_enrollment}</strong>
             </div>
           </Card>
@@ -201,7 +201,7 @@ export const DashboardPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <Statistic
-              title={<Text type="secondary">Sinh viên Thôi học (Dropout)</Text>}
+              title={<Text type="secondary">Dropout Count & Rate</Text>}
               value={overview.by_target.Dropout || 0}
               valueStyle={{ color: '#dc2626', fontWeight: 700 }}
               prefix={<ExclamationCircleOutlined />}
@@ -212,7 +212,7 @@ export const DashboardPage: React.FC = () => {
               }
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Đang theo học: <strong>{overview.by_target.Enrolled}</strong> (
+              Currently Enrolled: <strong>{overview.by_target.Enrolled}</strong> (
               {((overview.target_rate.Enrolled || 0) * 100).toFixed(1)}%)
             </div>
           </Card>
@@ -221,7 +221,7 @@ export const DashboardPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <Statistic
-              title={<Text type="secondary">Tốt nghiệp đúng hạn (Graduate)</Text>}
+              title={<Text type="secondary">Graduated On Time</Text>}
               value={overview.by_target.Graduate || 0}
               valueStyle={{ color: '#16a34a', fontWeight: 700 }}
               prefix={<CheckCircleOutlined />}
@@ -232,7 +232,7 @@ export const DashboardPage: React.FC = () => {
               }
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Điểm TB HK1: <strong>{overview.averages.semester_1_grade}</strong> · HK2:{' '}
+              Mean Grade Sem 1: <strong>{overview.averages.semester_1_grade}</strong> · Sem 2:{' '}
               <strong>{overview.averages.semester_2_grade}</strong>/20
             </div>
           </Card>
@@ -241,14 +241,14 @@ export const DashboardPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <Statistic
-              title={<Text type="secondary">Cảnh báo Tài chính & Học phí</Text>}
+              title={<Text type="secondary">Financial Risk Flags</Text>}
               value={overview.financial.tuition_not_up_to_date}
               valueStyle={{ color: '#d97706', fontWeight: 700 }}
               prefix={<DollarOutlined />}
-              suffix={<Text type="secondary" style={{ fontSize: 13 }}>SV trễ học phí</Text>}
+              suffix={<Text type="secondary" style={{ fontSize: 13 }}>Tuition Overdue</Text>}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Đang nợ: <strong>{overview.financial.debtors}</strong> · Có học bổng:{' '}
+              Active Debtors: <strong>{overview.financial.debtors}</strong> · Scholarships:{' '}
               <strong>{overview.financial.scholarship_holders}</strong>
             </div>
           </Card>
@@ -262,15 +262,16 @@ export const DashboardPage: React.FC = () => {
         icon={<BankOutlined />}
         message={
           <span style={{ fontWeight: 600 }}>
-            Phát hiện cốt lõi từ Khai phá dữ liệu (EDA Insights):
+            Key Exploratory Data Analysis (EDA) Findings:
           </span>
         }
         description={
           <div style={{ fontSize: 13, color: '#334155' }}>
-            Nhóm sinh viên <strong>chưa đóng học phí đúng hạn</strong> có tỷ lệ bỏ học lên tới{' '}
-            <Tag color="error">86.6%</Tag> (so với 24.7% ở nhóm đóng đúng hạn). Sinh viên{' '}
-            <strong>đang có khoản nợ</strong> có tỷ lệ bỏ học <Tag color="warning">62.0%</Tag>,
-            trong khi nhóm <strong>có học bổng</strong> chỉ ở mức <Tag color="success">12.2%</Tag>.
+            Students with <strong>overdue tuition fees</strong> exhibit an{' '}
+            <Tag color="error">86.6%</Tag> dropout rate (compared to 24.7% when up to date).{' '}
+            <strong>Debtors</strong> show a <Tag color="warning">62.0%</Tag> dropout rate, whereas{' '}
+            <strong>scholarship holders</strong> experience only a{' '}
+            <Tag color="success">12.2%</Tag> dropout rate.
           </div>
         }
         style={{ borderRadius: 12 }}
@@ -280,7 +281,7 @@ export const DashboardPage: React.FC = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={9}>
           <Card
-            title="Phân bố Trạng thái Học vụ toàn trường"
+            title="Academic Outcome Distribution"
             bordered={false}
             style={{ borderRadius: 12, height: '100%' }}
           >
@@ -302,7 +303,7 @@ export const DashboardPage: React.FC = () => {
                       <Cell key={entry.key} fill={TARGET_COLORS[entry.key] || '#64748b'} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(val: number) => [`${val.toLocaleString()} sinh viên`, 'Số lượng']} />
+                  <Tooltip formatter={(val: number) => [`${val.toLocaleString()} students`, 'Count']} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -312,13 +313,13 @@ export const DashboardPage: React.FC = () => {
 
         <Col xs={24} lg={15}>
           <Card
-            title="Tỷ lệ Thôi học / Tốt nghiệp theo Nhóm yếu tố (%)"
+            title="Dropout / Graduation Rate by Category (%)"
             extra={
               <Select
                 value={groupField}
                 onChange={setGroupField}
                 options={GROUP_FIELD_OPTIONS}
-                style={{ width: 250 }}
+                style={{ width: 270 }}
               />
             }
             bordered={false}
@@ -332,9 +333,9 @@ export const DashboardPage: React.FC = () => {
                   <YAxis unit="%" tick={{ fontSize: 12 }} />
                   <Tooltip formatter={(value: number) => `${value}%`} />
                   <Legend />
-                  <Bar dataKey="Thôi học (%)" fill="#dc2626" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Đang học (%)" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Tốt nghiệp (%)" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Dropout (%)" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Enrolled (%)" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Graduate (%)" fill="#16a34a" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -344,7 +345,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Chart Row 2: Numeric Distribution Histogram */}
       <Card
-        title="Phân bố Điểm số & Độ tuổi theo Kết quả Học vụ"
+        title="Grade & Age Distribution by Academic Outcome"
         extra={
           <Segmented
             value={histField}
@@ -363,9 +364,9 @@ export const DashboardPage: React.FC = () => {
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="Tốt nghiệp" stackId="a" fill="#16a34a" />
-              <Bar dataKey="Đang học" stackId="a" fill="#2563eb" />
-              <Bar dataKey="Thôi học" stackId="a" fill="#dc2626" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Graduate" stackId="a" fill="#16a34a" />
+              <Bar dataKey="Enrolled" stackId="a" fill="#2563eb" />
+              <Bar dataKey="Dropout" stackId="a" fill="#dc2626" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -376,7 +377,7 @@ export const DashboardPage: React.FC = () => {
         title={
           <Space>
             <WarningOutlined style={{ color: '#dc2626' }} />
-            <span>Danh sách Sinh viên Cần Cố vấn Học tập Chú ý (Nợ học phí & Điểm HK1 thấp)</span>
+            <span>Priority Intervention Queue (Overdue Tuition, Active Debt & Low Sem 1 GPA)</span>
           </Space>
         }
         extra={
@@ -385,7 +386,7 @@ export const DashboardPage: React.FC = () => {
             icon={<ArrowRightOutlined />}
             onClick={() => navigate('/students?tuition_fees_up_to_date=0&debtor=1')}
           >
-            Xem toàn bộ danh sách lọc
+            View All Flagged Students
           </Button>
         }
         bordered={false}
@@ -398,9 +399,9 @@ export const DashboardPage: React.FC = () => {
           size="middle"
           columns={[
             {
-              title: 'Mã SV',
+              title: 'Student ID',
               dataIndex: 'student_code',
-              width: 100,
+              width: 110,
               render: (code: string) => (
                 <Button
                   type="link"
@@ -412,29 +413,29 @@ export const DashboardPage: React.FC = () => {
               ),
             },
             {
-              title: 'Ngành đào tạo',
+              title: 'Course / Program',
               dataIndex: 'course_name',
-              render: (name: string, r: StudentListItem) => name || `Mã ngành ${r.course}`,
+              render: (name: string, r: StudentListItem) => name || `Course #${r.course}`,
             },
             {
-              title: 'Tuổi',
+              title: 'Age',
               dataIndex: 'age_at_enrollment',
               width: 70,
               align: 'center',
             },
             {
-              title: 'Tài chính',
+              title: 'Financial Flags',
               key: 'finance',
               render: (_: any, r: StudentListItem) => (
                 <Space size={4} wrap>
-                  {r.tuition_fees_up_to_date === 0 && <Tag color="error">Trễ học phí</Tag>}
-                  {r.debtor === 1 && <Tag color="warning">Đang nợ</Tag>}
-                  {r.scholarship_holder === 1 && <Tag color="success">Học bổng</Tag>}
+                  {r.tuition_fees_up_to_date === 0 && <Tag color="error">Tuition Overdue</Tag>}
+                  {r.debtor === 1 && <Tag color="warning">Debtor</Tag>}
+                  {r.scholarship_holder === 1 && <Tag color="success">Scholarship</Tag>}
                 </Space>
               ),
             },
             {
-              title: 'Điểm TB HK1',
+              title: 'Sem 1 Grade',
               dataIndex: 'curricular_units_1st_sem_grade',
               width: 120,
               align: 'right',
@@ -445,27 +446,27 @@ export const DashboardPage: React.FC = () => {
               ),
             },
             {
-              title: 'Trạng thái gốc',
+              title: 'Outcome',
               dataIndex: 'target',
               width: 130,
               render: (t: string) => renderTargetTag(t),
             },
             {
-              title: 'Đánh giá gần nhất',
+              title: 'Latest Evaluation',
               key: 'risk',
               width: 170,
               render: (_: any, r: StudentListItem) =>
                 renderRiskTag(r.latest_risk_level, r.latest_risk_score),
             },
             {
-              title: 'Thao tác',
+              title: 'Actions',
               key: 'action',
               width: 190,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <Space>
                   <Button size="small" onClick={() => navigate(`/students/${r.student_code}`)}>
-                    Hồ sơ
+                    Profile
                   </Button>
                   <Button
                     size="small"
@@ -473,7 +474,7 @@ export const DashboardPage: React.FC = () => {
                     ghost
                     onClick={() => navigate(`/predict?student=${r.student_code}`)}
                   >
-                    Dự đoán
+                    Evaluate
                   </Button>
                 </Space>
               ),
@@ -484,4 +485,3 @@ export const DashboardPage: React.FC = () => {
     </Space>
   );
 };
-

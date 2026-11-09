@@ -28,12 +28,10 @@ import {
   ArrowLeftOutlined,
   BookOutlined,
   CheckCircleOutlined,
-  DollarOutlined,
   EditOutlined,
   HistoryOutlined,
   SafetyCertificateOutlined,
   UserOutlined,
-  WarningOutlined,
 } from '@ant-design/icons';
 import {
   Bar,
@@ -97,7 +95,7 @@ export const StudentDetailPage: React.FC = () => {
       setPredictions(predRes.data);
       setRiskExplain(riskRes.data);
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không tìm thấy hồ sơ sinh viên');
+      message.error(err.response?.data?.detail || 'Student record not found');
     } finally {
       setLoading(false);
     }
@@ -129,10 +127,14 @@ export const StudentDetailPage: React.FC = () => {
       await api.post(endpoint, profile.student, {
         params: { student_code: code },
       });
-      message.success(`Đã chạy và lưu kết quả đánh giá (${STAGE_LABELS[riskStage]})!`);
+      message.success(`Evaluation saved (${STAGE_LABELS[riskStage]})!`);
       loadStudentData();
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Lỗi khi chạy dự đoán');
+      message.error(
+        typeof err.response?.data?.detail === 'string'
+          ? err.response.data.detail
+          : 'Failed to run prediction'
+      );
     } finally {
       setRunningPredict(false);
     }
@@ -148,12 +150,17 @@ export const StudentDetailPage: React.FC = () => {
     if (!code) return;
     setSavingEdit(true);
     try {
-      await api.put(`/api/students/${code}`, values);
-      message.success('Đã cập nhật hồ sơ sinh viên!');
+      const allValues = { ...editForm.getFieldsValue(true), ...values };
+      await api.put(`/api/students/${code}`, allValues);
+      message.success('Student record updated successfully!');
       setEditOpen(false);
       loadStudentData();
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Cập nhật thất bại');
+      message.error(
+        typeof err.response?.data?.detail === 'string'
+          ? err.response.data.detail
+          : 'Failed to update student record'
+      );
     } finally {
       setSavingEdit(false);
     }
@@ -175,18 +182,18 @@ export const StudentDetailPage: React.FC = () => {
 
   const semesterChartData = [
     {
-      name: 'Học kỳ 1',
-      'Đăng ký': profile.semester_1.enrolled,
-      'Đạt (Approved)': profile.semester_1.approved,
-      'Được công nhận': profile.semester_1.credited,
-      'Không dự thi': profile.semester_1.without_evaluations,
+      name: 'Semester 1',
+      Enrolled: profile.semester_1.enrolled,
+      Approved: profile.semester_1.approved,
+      Credited: profile.semester_1.credited,
+      'No Evaluation': profile.semester_1.without_evaluations,
     },
     {
-      name: 'Học kỳ 2',
-      'Đăng ký': profile.semester_2.enrolled,
-      'Đạt (Approved)': profile.semester_2.approved,
-      'Được công nhận': profile.semester_2.credited,
-      'Không dự thi': profile.semester_2.without_evaluations,
+      name: 'Semester 2',
+      Enrolled: profile.semester_2.enrolled,
+      Approved: profile.semester_2.approved,
+      Credited: profile.semester_2.credited,
+      'No Evaluation': profile.semester_2.without_evaluations,
     },
   ];
 
@@ -200,8 +207,8 @@ export const StudentDetailPage: React.FC = () => {
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <Breadcrumb
         items={[
-          { title: <Link to="/">Tổng quan</Link> },
-          { title: <Link to="/students">Hồ sơ Sinh viên</Link> },
+          { title: <Link to="/">Academic Overview</Link> },
+          { title: <Link to="/students">Student Directory</Link> },
           { title: s.student_code },
         ]}
       />
@@ -230,7 +237,7 @@ export const StudentDetailPage: React.FC = () => {
               <div>
                 <Space size={10} align="center" wrap>
                   <Title level={3} style={{ margin: 0 }}>
-                    Sinh viên {s.student_code}
+                    Student {s.student_code}
                   </Title>
                   {renderTargetTag(s.target)}
                   {profile.latest_prediction &&
@@ -240,23 +247,23 @@ export const StudentDetailPage: React.FC = () => {
                     )}
                 </Space>
                 <div style={{ marginTop: 6, color: '#475569', fontSize: 14 }}>
-                  <strong>Ngành đào tạo:</strong> {lbl.course || `Mã ngành ${s.course}`} ({s.course})
+                  <strong>Program:</strong> {lbl.course || `Course #${s.course}`} ({s.course})
                   {' · '}
-                  <strong>Hệ:</strong> {lbl.daytime_evening_attendance || s.daytime_evening_attendance}
+                  <strong>Regime:</strong> {lbl.daytime_evening_attendance || s.daytime_evening_attendance}
                 </div>
                 <Space size={6} style={{ marginTop: 10 }} wrap>
                   <Tag color={s.gender === 1 ? 'geekblue' : 'magenta'}>
-                    Giới tính: {lbl.gender || s.gender}
+                    Gender: {lbl.gender || s.gender}
                   </Tag>
-                  <Tag>Tuổi nhập học: {s.age_at_enrollment}</Tag>
+                  <Tag>Age at Enrollment: {s.age_at_enrollment}</Tag>
                   <Tag color={s.tuition_fees_up_to_date === 1 ? 'success' : 'error'}>
-                    Học phí: {lbl.tuition_fees_up_to_date}
+                    Tuition: {lbl.tuition_fees_up_to_date}
                   </Tag>
                   <Tag color={s.debtor === 1 ? 'warning' : 'default'}>
-                    Công nợ: {lbl.debtor}
+                    Debtor: {lbl.debtor}
                   </Tag>
                   <Tag color={s.scholarship_holder === 1 ? 'cyan' : 'default'}>
-                    Học bổng: {lbl.scholarship_holder}
+                    Scholarship: {lbl.scholarship_holder}
                   </Tag>
                 </Space>
               </div>
@@ -266,11 +273,11 @@ export const StudentDetailPage: React.FC = () => {
           <Col xs={24} lg={9} style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Space wrap>
               <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/students')}>
-                Danh sách
+                Directory
               </Button>
               {user?.role === 'Admin' && (
                 <Button icon={<EditOutlined />} onClick={openEditModal}>
-                  Chỉnh sửa hồ sơ
+                  Edit Record
                 </Button>
               )}
               <Button
@@ -278,7 +285,7 @@ export const StudentDetailPage: React.FC = () => {
                 icon={<AlertOutlined />}
                 onClick={() => navigate(`/predict?student=${s.student_code}`)}
               >
-                Mở Bộ mô phỏng Dự đoán
+                Open What-If Simulator
               </Button>
             </Space>
           </Col>
@@ -294,23 +301,23 @@ export const StudentDetailPage: React.FC = () => {
             key: 'risk',
             label: (
               <span>
-                <SafetyCertificateOutlined /> Phân tích Nguy cơ & Khuyến nghị Học vụ
+                <SafetyCertificateOutlined /> Risk Analysis & Recommendations
               </span>
             ),
             children: (
               <Row gutter={[16, 16]}>
                 <Col xs={24} lg={8}>
                   <Card
-                    title="Chỉ số Nguy cơ Bỏ học"
+                    title="Dropout Risk Index"
                     extra={
                       <Segmented
                         size="small"
                         value={riskStage}
                         onChange={(v) => setRiskStage(v as any)}
                         options={[
-                          { value: 'enrollment', label: 'Nhập học' },
-                          { value: 'semester_1', label: 'Kỳ 1' },
-                          { value: 'semester_2', label: 'Kỳ 2' },
+                          { value: 'enrollment', label: 'Enrollment' },
+                          { value: 'semester_1', label: 'Sem 1' },
+                          { value: 'semester_2', label: 'Sem 2' },
                         ]}
                       />
                     }
@@ -330,7 +337,7 @@ export const StudentDetailPage: React.FC = () => {
                             onClick={handleQuickEvaluate}
                             block
                           >
-                            Lưu kết quả đánh giá ({STAGE_LABELS[riskStage]}) vào Nhật ký
+                            Save Evaluation ({STAGE_LABELS[riskStage]}) to Logs
                           </Button>
                         </div>
                         <Alert
@@ -347,7 +354,7 @@ export const StudentDetailPage: React.FC = () => {
                 <Col xs={24} lg={16}>
                   <Space direction="vertical" size={16} style={{ width: '100%' }}>
                     <Card
-                      title="Giải thích các Yếu tố Tác động đến Điểm Rủi ro (Explainable Factors)"
+                      title="Explainable Risk Factor Breakdown"
                       bordered={false}
                       style={{ borderRadius: 12 }}
                     >
@@ -355,7 +362,7 @@ export const StudentDetailPage: React.FC = () => {
                         <Alert
                           type="success"
                           showIcon
-                          message="Không phát hiện yếu tố cảnh báo bất thường ở giai đoạn này."
+                          message="No abnormal risk triggers detected at this stage."
                         />
                       ) : (
                         <List
@@ -366,19 +373,19 @@ export const StudentDetailPage: React.FC = () => {
                                 avatar={
                                   f.impact === 'increase' ? (
                                     <Tag color="error" style={{ fontWeight: 700 }}>
-                                      +{Math.round(f.weight * 100)}% rủi ro
+                                      +{Math.round(f.weight * 100)}% Risk
                                     </Tag>
                                   ) : f.impact === 'decrease' ? (
-                                    <Tag color="success">Yếu tố tích cực</Tag>
+                                    <Tag color="success">Protective</Tag>
                                   ) : (
-                                    <Tag color="warning">Lưu ý ngữ cảnh</Tag>
+                                    <Tag color="warning">Contextual</Tag>
                                   )
                                 }
                                 title={
                                   <Text strong>
                                     {f.label}{' '}
                                     <Text type="secondary" style={{ fontWeight: 400 }}>
-                                      (Giá trị hiện tại: {f.value})
+                                      (Current Value: {f.value})
                                     </Text>
                                   </Text>
                                 }
@@ -391,7 +398,7 @@ export const StudentDetailPage: React.FC = () => {
                     </Card>
 
                     <Card
-                      title="Khuyến nghị Hành động cho Cố vấn Học tập"
+                      title="Advisor Intervention Recommendations"
                       bordered={false}
                       style={{ borderRadius: 12 }}
                     >
@@ -417,7 +424,7 @@ export const StudentDetailPage: React.FC = () => {
             key: 'academic',
             label: (
               <span>
-                <BookOutlined /> Kết quả Học tập (Học kỳ 1 & 2)
+                <BookOutlined /> Academic Performance (Sem 1 & 2)
               </span>
             ),
             children: (
@@ -426,17 +433,17 @@ export const StudentDetailPage: React.FC = () => {
                   <Alert
                     type="warning"
                     showIcon
-                    message="Sinh viên không đăng ký học phần nào trong cả 2 học kỳ (0 học phần)"
-                    description="Theo dữ liệu tuyển sinh & đào tạo, sinh viên này đã hoàn tất nhập học nhưng thôi học ngay từ đầu năm (không đăng ký tín chỉ và không dự thi bất kỳ môn học nào)."
+                    message="Zero Curricular Units Enrolled Across Both Semesters (0 Units)"
+                    description="According to institutional records, this student completed initial admission but withdrew immediately without enrolling in or taking exams for any courses."
                   />
                 )}
                 <Row gutter={[16, 16]}>
                   <Col xs={24} md={12}>
-                    <Card title="Tổng kết Học kỳ 1" bordered={false} style={{ borderRadius: 12 }}>
+                    <Card title="Semester 1 Summary" bordered={false} style={{ borderRadius: 12 }}>
                       <Row gutter={16}>
                         <Col span={8}>
                           <Statistic
-                            title="Điểm TB HK1"
+                            title="Sem 1 Grade Avg"
                             value={profile.semester_1.grade}
                             precision={2}
                             suffix="/ 20"
@@ -447,20 +454,20 @@ export const StudentDetailPage: React.FC = () => {
                         </Col>
                         <Col span={8}>
                           <Statistic
-                            title="Số học phần Đạt"
+                            title="Approved Units"
                             value={profile.semester_1.approved}
                             suffix={`/ ${profile.semester_1.enrolled}`}
                           />
                         </Col>
                         <Col span={8}>
                           <Statistic
-                            title="Số lượt dự thi"
+                            title="Evaluations"
                             value={profile.semester_1.evaluations}
                           />
                         </Col>
                       </Row>
                       <div style={{ marginTop: 16 }}>
-                        <Text type="secondary">Tỷ lệ hoàn thành học phần HK1:</Text>
+                        <Text type="secondary">Semester 1 Unit Approval Rate:</Text>
                         <Progress
                           percent={Math.round((profile.semester_1.approval_rate || 0) * 100)}
                           status={
@@ -472,11 +479,11 @@ export const StudentDetailPage: React.FC = () => {
                   </Col>
 
                   <Col xs={24} md={12}>
-                    <Card title="Tổng kết Học kỳ 2" bordered={false} style={{ borderRadius: 12 }}>
+                    <Card title="Semester 2 Summary" bordered={false} style={{ borderRadius: 12 }}>
                       <Row gutter={16}>
                         <Col span={8}>
                           <Statistic
-                            title="Điểm TB HK2"
+                            title="Sem 2 Grade Avg"
                             value={profile.semester_2.grade}
                             precision={2}
                             suffix="/ 20"
@@ -487,20 +494,20 @@ export const StudentDetailPage: React.FC = () => {
                         </Col>
                         <Col span={8}>
                           <Statistic
-                            title="Số học phần Đạt"
+                            title="Approved Units"
                             value={profile.semester_2.approved}
                             suffix={`/ ${profile.semester_2.enrolled}`}
                           />
                         </Col>
                         <Col span={8}>
                           <Statistic
-                            title="Số lượt dự thi"
+                            title="Evaluations"
                             value={profile.semester_2.evaluations}
                           />
                         </Col>
                       </Row>
                       <div style={{ marginTop: 16 }}>
-                        <Text type="secondary">Tỷ lệ hoàn thành học phần HK2:</Text>
+                        <Text type="secondary">Semester 2 Unit Approval Rate:</Text>
                         <Progress
                           percent={Math.round((profile.semester_2.approval_rate || 0) * 100)}
                           status={
@@ -513,7 +520,7 @@ export const StudentDetailPage: React.FC = () => {
                 </Row>
 
                 <Card
-                  title="Biểu đồ Đối chiếu Học phần Đăng ký vs Đạt qua 2 Học kỳ"
+                  title="Enrolled vs. Approved Curricular Units Across Semesters"
                   bordered={false}
                   style={{ borderRadius: 12 }}
                 >
@@ -525,10 +532,10 @@ export const StudentDetailPage: React.FC = () => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="Đăng ký" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="Đạt (Approved)" fill="#16a34a" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="Được công nhận" fill="#0891b2" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="Không dự thi" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Enrolled" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Approved" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Credited" fill="#0891b2" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="No Evaluation" fill="#dc2626" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -540,83 +547,83 @@ export const StudentDetailPage: React.FC = () => {
             key: 'personal',
             label: (
               <span>
-                <UserOutlined /> Lý lịch, Gia đình & Tuyển sinh
+                <UserOutlined /> Personal, Family & Admission
               </span>
             ),
             children: (
               <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                <Card title="Thông tin Cá nhân & Nhân khẩu học" bordered={false} style={{ borderRadius: 12 }}>
+                <Card title="Personal & Demographic Details" bordered={false} style={{ borderRadius: 12 }}>
                   <Descriptions bordered column={{ xs: 1, sm: 2, md: 3 }} size="small">
-                    <Descriptions.Item label="Mã sinh viên">{s.student_code}</Descriptions.Item>
-                    <Descriptions.Item label="Giới tính">{formatFieldVal('gender')}</Descriptions.Item>
-                    <Descriptions.Item label="Tuổi khi nhập học">{s.age_at_enrollment}</Descriptions.Item>
-                    <Descriptions.Item label="Tình trạng hôn nhân">
+                    <Descriptions.Item label="Student ID">{s.student_code}</Descriptions.Item>
+                    <Descriptions.Item label="Gender">{formatFieldVal('gender')}</Descriptions.Item>
+                    <Descriptions.Item label="Age at Enrollment">{s.age_at_enrollment}</Descriptions.Item>
+                    <Descriptions.Item label="Marital Status">
                       {formatFieldVal('marital_status')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Quốc tịch">
+                    <Descriptions.Item label="Nationality">
                       {formatFieldVal('nationality')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Sinh viên quốc tế">
+                    <Descriptions.Item label="International Student">
                       {formatFieldVal('international')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Học xa nơi cư trú">
+                    <Descriptions.Item label="Displaced Student">
                       {formatFieldVal('displaced')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Nhu cầu giáo dục đặc biệt">
+                    <Descriptions.Item label="Educational Special Needs">
                       {formatFieldVal('educational_special_needs')}
                     </Descriptions.Item>
                   </Descriptions>
                 </Card>
 
-                <Card title="Thông tin Tuyển sinh & Đầu vào" bordered={false} style={{ borderRadius: 12 }}>
+                <Card title="Admission & Prior Qualification" bordered={false} style={{ borderRadius: 12 }}>
                   <Descriptions bordered column={{ xs: 1, sm: 2 }} size="small">
-                    <Descriptions.Item label="Ngành học">{formatFieldVal('course')}</Descriptions.Item>
-                    <Descriptions.Item label="Hình thức học">
+                    <Descriptions.Item label="Course / Program">{formatFieldVal('course')}</Descriptions.Item>
+                    <Descriptions.Item label="Attendance Regime">
                       {formatFieldVal('daytime_evening_attendance')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Phương thức tuyển sinh">
+                    <Descriptions.Item label="Application Mode">
                       {formatFieldVal('application_mode')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Thứ tự nguyện vọng">
-                      Nguyện vọng {s.application_order}
+                    <Descriptions.Item label="Application Order">
+                      Choice #{s.application_order}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Trình độ trước nhập học">
+                    <Descriptions.Item label="Previous Qualification">
                       {formatFieldVal('previous_qualification')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Điểm trình độ trước">
+                    <Descriptions.Item label="Previous Qualification Grade">
                       {s.previous_qualification_grade} / 200
                     </Descriptions.Item>
-                    <Descriptions.Item label="Điểm trúng tuyển đầu vào">
+                    <Descriptions.Item label="Admission Grade">
                       <strong>{s.admission_grade} / 200</strong>
                     </Descriptions.Item>
                   </Descriptions>
                 </Card>
 
-                <Card title="Nền tảng Gia đình, Tài chính & Vĩ mô" bordered={false} style={{ borderRadius: 12 }}>
+                <Card title="Family Background, Financial & Macroeconomic Context" bordered={false} style={{ borderRadius: 12 }}>
                   <Descriptions bordered column={{ xs: 1, sm: 2 }} size="small">
-                    <Descriptions.Item label="Trình độ của Mẹ">
+                    <Descriptions.Item label="Mother's Qualification">
                       {formatFieldVal('mothers_qualification')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Trình độ của Cha">
+                    <Descriptions.Item label="Father's Qualification">
                       {formatFieldVal('fathers_qualification')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Nghề nghiệp của Mẹ">
+                    <Descriptions.Item label="Mother's Occupation">
                       {formatFieldVal('mothers_occupation')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Nghề nghiệp của Cha">
+                    <Descriptions.Item label="Father's Occupation">
                       {formatFieldVal('fathers_occupation')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Đóng học phí đúng hạn">
+                    <Descriptions.Item label="Tuition Fees Up to Date">
                       {formatFieldVal('tuition_fees_up_to_date')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Tình trạng công nợ">
+                    <Descriptions.Item label="Debtor Status">
                       {formatFieldVal('debtor')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Diện nhận học bổng">
+                    <Descriptions.Item label="Scholarship Holder">
                       {formatFieldVal('scholarship_holder')}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Bối cảnh vĩ mô">
-                      Thất nghiệp: {s.unemployment_rate}% · Lạm phát: {s.inflation_rate}% · GDP: {s.gdp}
+                    <Descriptions.Item label="Macroeconomic Indicators">
+                      Unemployment: {s.unemployment_rate}% · Inflation: {s.inflation_rate}% · GDP: {s.gdp}
                     </Descriptions.Item>
                   </Descriptions>
                 </Card>
@@ -627,7 +634,7 @@ export const StudentDetailPage: React.FC = () => {
             key: 'history',
             label: (
               <span>
-                <HistoryOutlined /> Lịch sử Đánh giá ({predictions.length})
+                <HistoryOutlined /> Evaluation History ({predictions.length})
               </span>
             ),
             children: (
@@ -638,40 +645,40 @@ export const StudentDetailPage: React.FC = () => {
                   pagination={{ pageSize: 10 }}
                   columns={[
                     {
-                      title: 'Mã lần chạy',
+                      title: 'Run ID',
                       dataIndex: 'id',
                       width: 100,
                       render: (id: number) => `#${id}`,
                     },
                     {
-                      title: 'Giai đoạn đánh giá',
+                      title: 'Evaluation Stage',
                       dataIndex: 'stage',
                       render: (st: string) => <Tag color="blue">{STAGE_LABELS[st] || st}</Tag>,
                     },
                     {
-                      title: 'Điểm rủi ro',
+                      title: 'Risk Score',
                       dataIndex: 'risk_score',
                       render: (sc: number) => <strong>{(sc * 100).toFixed(0)}% ({sc})</strong>,
                     },
                     {
-                      title: 'Mức cảnh báo',
+                      title: 'Risk Level',
                       dataIndex: 'risk_level',
                       render: (lv: string, r: PredictionOut) => renderRiskTag(lv, r.risk_score),
                     },
                     {
-                      title: 'Dự báo xu hướng',
+                      title: 'Predicted Outcome',
                       dataIndex: 'predicted_label',
                       render: (lb: string) => renderTargetTag(lb),
                     },
                     {
-                      title: 'Người đánh giá',
+                      title: 'Evaluated By',
                       dataIndex: 'evaluator_name',
                       render: (n: string, r: PredictionOut) => n || `User #${r.evaluated_by}`,
                     },
                     {
-                      title: 'Thời gian',
+                      title: 'Timestamp',
                       dataIndex: 'created_at',
-                      render: (dt: string) => new Date(dt).toLocaleString('vi-VN'),
+                      render: (dt: string) => new Date(dt).toLocaleString('en-US'),
                     },
                   ]}
                 />
@@ -683,7 +690,7 @@ export const StudentDetailPage: React.FC = () => {
 
       {/* Admin Edit Student Modal */}
       <Modal
-        title={`Chỉnh sửa Hồ sơ Sinh viên ${s.student_code}`}
+        title={`Edit Student Record – ${s.student_code}`}
         open={editOpen}
         onCancel={() => setEditOpen(false)}
         width={960}
@@ -691,13 +698,13 @@ export const StudentDetailPage: React.FC = () => {
         destroyOnClose
       >
         <Form form={editForm} layout="vertical" onFinish={handleUpdateStudent}>
-          <Form.Item name="target" label="Trạng thái học vụ">
+          <Form.Item name="target" label="Academic Outcome">
             <Select
               allowClear
               options={[
-                { value: 'Enrolled', label: 'Đang theo học (Enrolled)' },
-                { value: 'Graduate', label: 'Tốt nghiệp (Graduate)' },
-                { value: 'Dropout', label: 'Thôi học (Dropout)' },
+                { value: 'Enrolled', label: 'Enrolled' },
+                { value: 'Graduate', label: 'Graduate' },
+                { value: 'Dropout', label: 'Dropout' },
               ]}
             />
           </Form.Item>
@@ -705,14 +712,15 @@ export const StudentDetailPage: React.FC = () => {
             defaultActiveKey={['financial', 'semester_1', 'semester_2']}
             items={Object.entries(groupedFields).map(([grp, fields]) => ({
               key: grp,
+              forceRender: true,
               label: <strong>{GROUP_LABELS[grp] || grp}</strong>,
               children: <MetaFormItems fields={fields} colSpan={8} />,
             }))}
           />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-            <Button onClick={() => setEditOpen(false)}>Hủy</Button>
+            <Button onClick={() => setEditOpen(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={savingEdit}>
-              Lưu thay đổi
+              Save Changes
             </Button>
           </div>
         </Form>
@@ -720,4 +728,3 @@ export const StudentDetailPage: React.FC = () => {
     </Space>
   );
 };
-

@@ -40,43 +40,43 @@ _FEATURE_SETS_PATH = _BUNDLE_DIR / "data" / "processed" / "feature_sets.json"
 # 0. METADATA: field labels & categorical code options
 # ==========================================
 FIELD_LABELS_VI: Dict[str, str] = {
-    "marital_status": "Tình trạng hôn nhân",
-    "application_mode": "Phương thức tuyển sinh",
-    "application_order": "Thứ tự nguyện vọng",
-    "course": "Ngành học",
-    "daytime_evening_attendance": "Hình thức học",
-    "previous_qualification": "Trình độ trước khi nhập học",
-    "previous_qualification_grade": "Điểm trình độ trước (0–200)",
-    "nationality": "Quốc tịch",
-    "mothers_qualification": "Trình độ học vấn của mẹ",
-    "fathers_qualification": "Trình độ học vấn của cha",
-    "mothers_occupation": "Nghề nghiệp của mẹ",
-    "fathers_occupation": "Nghề nghiệp của cha",
-    "admission_grade": "Điểm đầu vào (0–200)",
-    "displaced": "Học xa nơi cư trú",
-    "educational_special_needs": "Nhu cầu giáo dục đặc biệt",
-    "debtor": "Đang nợ",
-    "tuition_fees_up_to_date": "Học phí đúng hạn",
-    "gender": "Giới tính",
-    "scholarship_holder": "Có học bổng",
-    "age_at_enrollment": "Tuổi khi nhập học",
-    "international": "Sinh viên quốc tế",
-    "unemployment_rate": "Tỷ lệ thất nghiệp (%)",
-    "inflation_rate": "Tỷ lệ lạm phát (%)",
-    "gdp": "GDP",
-    "curricular_units_1st_sem_credited": "HK1 – Học phần được công nhận",
-    "curricular_units_1st_sem_enrolled": "HK1 – Học phần đăng ký",
-    "curricular_units_1st_sem_evaluations": "HK1 – Số lượt đánh giá",
-    "curricular_units_1st_sem_approved": "HK1 – Học phần đạt",
-    "curricular_units_1st_sem_grade": "HK1 – Điểm trung bình (0–20)",
-    "curricular_units_1st_sem_without_evaluations": "HK1 – Học phần không đánh giá",
-    "curricular_units_2nd_sem_credited": "HK2 – Học phần được công nhận",
-    "curricular_units_2nd_sem_enrolled": "HK2 – Học phần đăng ký",
-    "curricular_units_2nd_sem_evaluations": "HK2 – Số lượt đánh giá",
-    "curricular_units_2nd_sem_approved": "HK2 – Học phần đạt",
-    "curricular_units_2nd_sem_grade": "HK2 – Điểm trung bình (0–20)",
-    "curricular_units_2nd_sem_without_evaluations": "HK2 – Học phần không đánh giá",
-    "target": "Tình trạng học tập",
+    "marital_status": "Marital Status",
+    "application_mode": "Application Mode",
+    "application_order": "Application Order (0–9)",
+    "course": "Course / Program",
+    "daytime_evening_attendance": "Attendance Regime",
+    "previous_qualification": "Previous Qualification",
+    "previous_qualification_grade": "Previous Qualification Grade (0–200)",
+    "nationality": "Nationality",
+    "mothers_qualification": "Mother's Qualification",
+    "fathers_qualification": "Father's Qualification",
+    "mothers_occupation": "Mother's Occupation",
+    "fathers_occupation": "Father's Occupation",
+    "admission_grade": "Admission Grade (0–200)",
+    "displaced": "Displaced Student",
+    "educational_special_needs": "Educational Special Needs",
+    "debtor": "Debtor Status",
+    "tuition_fees_up_to_date": "Tuition Fees Up to Date",
+    "gender": "Gender",
+    "scholarship_holder": "Scholarship Holder",
+    "age_at_enrollment": "Age at Enrollment",
+    "international": "International Student",
+    "unemployment_rate": "Unemployment Rate (%)",
+    "inflation_rate": "Inflation Rate (%)",
+    "gdp": "GDP Growth (%)",
+    "curricular_units_1st_sem_credited": "Sem 1 – Credited Units",
+    "curricular_units_1st_sem_enrolled": "Sem 1 – Enrolled Units",
+    "curricular_units_1st_sem_evaluations": "Sem 1 – Evaluations",
+    "curricular_units_1st_sem_approved": "Sem 1 – Approved Units",
+    "curricular_units_1st_sem_grade": "Sem 1 – Grade Average (0–20)",
+    "curricular_units_1st_sem_without_evaluations": "Sem 1 – Units Without Evaluations",
+    "curricular_units_2nd_sem_credited": "Sem 2 – Credited Units",
+    "curricular_units_2nd_sem_enrolled": "Sem 2 – Enrolled Units",
+    "curricular_units_2nd_sem_evaluations": "Sem 2 – Evaluations",
+    "curricular_units_2nd_sem_approved": "Sem 2 – Approved Units",
+    "curricular_units_2nd_sem_grade": "Sem 2 – Grade Average (0–20)",
+    "curricular_units_2nd_sem_without_evaluations": "Sem 2 – Units Without Evaluations",
+    "target": "Academic Outcome",
 }
 
 FIELD_GROUPS: Dict[str, List[str]] = {
@@ -104,40 +104,39 @@ FIELD_RANGES: Dict[str, Dict[str, float]] = {
     "curricular_units_2nd_sem_grade": {"min": 0, "max": 20},
 }
 
-# Vietnamese labels for the most frequently displayed categorical fields.
-# The remaining coded fields fall back to the official English UCI labels.
+# Clean English labels for categorical & binary fields.
 _VI_OPTIONS: Dict[str, Dict[int, str]] = {
     "course": {
-        33: "Công nghệ sản xuất nhiên liệu sinh học",
-        171: "Thiết kế hoạt hình & đa phương tiện",
-        8014: "Công tác xã hội (buổi tối)",
-        9003: "Nông học",
-        9070: "Thiết kế truyền thông",
-        9085: "Điều dưỡng thú y",
-        9119: "Kỹ thuật tin học",
-        9130: "Chăn nuôi ngựa",
-        9147: "Quản trị kinh doanh",
-        9238: "Công tác xã hội",
-        9254: "Du lịch",
-        9500: "Điều dưỡng",
-        9556: "Vệ sinh răng miệng",
-        9670: "Quản trị quảng cáo & marketing",
-        9773: "Báo chí & truyền thông",
-        9853: "Giáo dục cơ bản",
-        9991: "Quản trị kinh doanh (buổi tối)",
+        33: "Biofuel Production Technologies",
+        171: "Animation and Multimedia Design",
+        8014: "Social Service (Evening)",
+        9003: "Agronomy",
+        9070: "Communication Design",
+        9085: "Veterinary Nursing",
+        9119: "Informatics Engineering",
+        9130: "Equinculture",
+        9147: "Management",
+        9238: "Social Service",
+        9254: "Tourism",
+        9500: "Nursing",
+        9556: "Oral Hygiene",
+        9670: "Advertising and Marketing Management",
+        9773: "Journalism and Communication",
+        9853: "Basic Education",
+        9991: "Management (Evening)",
     },
     "marital_status": {
-        1: "Độc thân", 2: "Đã kết hôn", 3: "Góa", 4: "Ly hôn",
-        5: "Sống chung không đăng ký", 6: "Ly thân",
+        1: "Single", 2: "Married", 3: "Widower", 4: "Divorced",
+        5: "Facto Union", 6: "Legally Separated",
     },
-    "gender": {1: "Nam", 0: "Nữ"},
-    "daytime_evening_attendance": {1: "Ban ngày", 0: "Buổi tối"},
-    "tuition_fees_up_to_date": {1: "Đúng hạn", 0: "Chưa đóng"},
-    "debtor": {1: "Có", 0: "Không"},
-    "scholarship_holder": {1: "Có", 0: "Không"},
-    "displaced": {1: "Có", 0: "Không"},
-    "educational_special_needs": {1: "Có", 0: "Không"},
-    "international": {1: "Có", 0: "Không"},
+    "gender": {1: "Male", 0: "Female"},
+    "daytime_evening_attendance": {1: "Daytime", 0: "Evening"},
+    "tuition_fees_up_to_date": {1: "Up to date", 0: "Overdue"},
+    "debtor": {1: "Yes", 0: "No"},
+    "scholarship_holder": {1: "Yes", 0: "No"},
+    "displaced": {1: "Yes", 0: "No"},
+    "educational_special_needs": {1: "Yes", 0: "No"},
+    "international": {1: "Yes", 0: "No"},
 }
 
 _CODE_LABEL_RE = re.compile(r"(\d+)\s*[–-]\s*(.+?)(?=\s+\d+\s*[–-]\s|;|$)")
@@ -778,44 +777,44 @@ def explain_student_risk(
     # --- Weighted factors (same rule as main.py) ---
     if s.tuition_fees_up_to_date == 0:
         add("tuition_fees_up_to_date", 0, 0.35, "increase",
-            "Chưa đóng học phí đúng hạn (nhóm này có tỷ lệ bỏ học ~86.6%).")
+            "Tuition fees are overdue (this group has an 86.6% dropout rate in EDA).")
     if s.debtor == 1:
-        add("debtor", 1, 0.20, "increase", "Sinh viên đang có nợ (tỷ lệ bỏ học ~62.0%).")
+        add("debtor", 1, 0.20, "increase", "Student has active debt (62.0% dropout rate in EDA).")
     if stage in ("semester_1", "semester_2") and s.curricular_units_1st_sem_grade < 10:
         add("curricular_units_1st_sem_grade", s.curricular_units_1st_sem_grade, 0.25, "increase",
-            "Điểm trung bình học kỳ 1 dưới 10/20.")
+            "1st semester grade average is below 10/20.")
 
     # --- Context-only factors (not part of the score, shown to help advisors) ---
     if s.scholarship_holder == 1:
         add("scholarship_holder", 1, 0.0, "decrease",
-            "Có học bổng (tỷ lệ bỏ học ~12.2% so với 38.7%).")
+            "Scholarship holder (associated with a much lower dropout rate: 12.2% vs 38.7%).")
     if s.age_at_enrollment >= 25:
         add("age_at_enrollment", s.age_at_enrollment, 0.0, "context",
-            "Nhập học ở độ tuổi lớn (nhóm Dropout có tuổi trung bình ~26).")
+            "Enrolled at an older age (Dropout group has a mean enrollment age of 26.1).")
     if stage in ("semester_1", "semester_2") and s.curricular_units_1st_sem_enrolled:
         rate = s.curricular_units_1st_sem_approved / s.curricular_units_1st_sem_enrolled
         if rate < 0.5:
             add("curricular_units_1st_sem_approved", s.curricular_units_1st_sem_approved, 0.0,
-                "context", f"Chỉ đạt {rate:.0%} số học phần đăng ký ở học kỳ 1.")
+                "context", f"Approved only {rate:.0%} of enrolled units in Semester 1.")
     if stage == "semester_2" and s.curricular_units_2nd_sem_enrolled:
         rate = s.curricular_units_2nd_sem_approved / s.curricular_units_2nd_sem_enrolled
         if rate < 0.5:
             add("curricular_units_2nd_sem_approved", s.curricular_units_2nd_sem_approved, 0.0,
-                "context", f"Chỉ đạt {rate:.0%} số học phần đăng ký ở học kỳ 2.")
+                "context", f"Approved only {rate:.0%} of enrolled units in Semester 2.")
 
     score = min(round(base + sum(f.weight for f in factors), 2), 0.99)
 
     suggestions = []
     keys = {f.key for f in factors}
     if "tuition_fees_up_to_date" in keys or "debtor" in keys:
-        suggestions.append("Liên hệ phòng Tài chính để hỗ trợ gia hạn / trả góp học phí.")
-        suggestions.append("Giới thiệu các chương trình học bổng, hỗ trợ tài chính.")
+        suggestions.append("Contact the Financial Aid Office to arrange a tuition payment plan or extension.")
+        suggestions.append("Provide information on emergency financial aid and scholarship opportunities.")
     if keys & {"curricular_units_1st_sem_grade", "curricular_units_1st_sem_approved",
                "curricular_units_2nd_sem_approved"}:
-        suggestions.append("Đặt lịch gặp cố vấn học tập, xem xét giảm tải số học phần.")
-        suggestions.append("Giới thiệu lớp phụ đạo / nhóm học tập.")
+        suggestions.append("Schedule a 1-on-1 academic advising session and consider reducing next semester's course load.")
+        suggestions.append("Refer the student to peer tutoring and study support groups.")
     if not suggestions:
-        suggestions.append("Tiếp tục theo dõi định kỳ.")
+        suggestions.append("Maintain regular semester check-ins; academic progress is currently stable.")
 
     return RiskExplanation(
         student_code=student_code,

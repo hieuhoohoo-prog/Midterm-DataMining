@@ -7,6 +7,7 @@ import {
   Col,
   Collapse,
   Divider,
+  Empty,
   Form,
   Input,
   List,
@@ -60,6 +61,7 @@ export const PredictPage: React.FC = () => {
 
   const [form] = Form.useForm();
   const [studentCode, setStudentCode] = useState<string>(initialStudent);
+  const [loadedStudent, setLoadedStudent] = useState<StudentRecord | null>(null);
   const [searchOptions, setSearchOptions] = useState<{ value: string; label: React.ReactNode }[]>([]);
   const [stageIdx, setStageIdx] = useState<number>(2); // default semester_2
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -68,24 +70,27 @@ export const PredictPage: React.FC = () => {
 
   const stage = STAGE_ORDER[stageIdx];
 
-  const loadStudentIntoForm = async (code: string) => {
+  const loadStudentIntoForm = async (code: string, notify = false) => {
     try {
-      const [stuRes, expRes] = await Promise.all([
-        api.get<StudentRecord>(`/api/students/${code}`),
-        api.get<RiskExplanation>(`/api/students/${code}/risk-factors`, {
-          params: { stage },
-        }),
-      ]);
+      const stuRes = await api.get<StudentRecord>(`/api/students/${code.trim()}`);
+      setLoadedStudent(stuRes.data);
       form.setFieldsValue(stuRes.data);
       setStudentCode(stuRes.data.student_code);
-      setExplain(expRes.data);
+      // Reset previous prediction output so clicking "Run Prediction & Save" clearly produces the new evaluation
+      setResult(null);
+      setExplain(null);
+      if (notify) {
+        message.info(
+          `Loaded profile for ${stuRes.data.student_code}. Click "Run Prediction & Save" to evaluate.`
+        );
+      }
     } catch {
-      message.warning(`Không tìm thấy mã SV ${code} để điền tự động, bạn có thể nhập thủ công.`);
+      message.warning(`Student ID "${code}" not found in database. You can still enter values manually.`);
     }
   };
 
   useEffect(() => {
-    loadStudentIntoForm(initialStudent);
+    loadStudentIntoForm(initialStudent, false);
   }, [initialStudent]);
 
   const handleStudentSearch = async (val: string) => {
@@ -104,7 +109,7 @@ export const PredictPage: React.FC = () => {
           label: (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>
-                <strong>{item.student_code}</strong> – {item.course_name || `Ngành #${item.course}`}
+                <strong>{item.student_code}</strong> – {item.course_name || `Course #${item.course}`}
               </span>
               {renderTargetTag(item.target)}
             </div>
@@ -131,9 +136,16 @@ export const PredictPage: React.FC = () => {
       return acc;
     }, {});
 
-  const handleRunPrediction = async (values: any) => {
+  const handleRunPrediction = async (formValues?: any) => {
     setSubmitting(true);
     try {
+      // Combine baseline student attributes with all current form values (including collapsed panels)
+      const values: Record<string, any> = {
+        ...(loadedStudent || {}),
+        ...form.getFieldsValue(true),
+        ...(formValues || {}),
+      };
+
       const endpoint =
         stage === 'enrollment'
           ? '/api/predict/enrollment'
@@ -146,26 +158,26 @@ export const PredictPage: React.FC = () => {
       });
       setResult(res.data);
 
-      // Build live explanation from current form values (supports What-If simulation!)
+      // Build live explanation from submitted form values (supports What-If simulation!)
       const factors: RiskExplanation['factors'] = [];
-      if (values.tuition_fees_up_to_date === 0) {
+      if (Number(values.tuition_fees_up_to_date) === 0) {
         factors.push({
           key: 'tuition_fees_up_to_date',
-          label: 'Học phí đúng hạn',
+          label: 'Tuition Fees Up to Date',
           value: 0,
           weight: 0.35,
           impact: 'increase',
-          description: 'Chưa đóng học phí đúng hạn (+35% nguy cơ bỏ học).',
+          description: 'Tuition fees are overdue (+35% dropout risk contribution).',
         });
       }
-      if (values.debtor === 1) {
+      if (Number(values.debtor) === 1) {
         factors.push({
           key: 'debtor',
-          label: 'Đang nợ',
+          label: 'Debtor Status',
           value: 1,
           weight: 0.2,
           impact: 'increase',
-          description: 'Sinh viên đang có khoản công nợ (+20% nguy cơ bỏ học).',
+          description: 'Student has active financial debt (+20% dropout risk contribution).',
         });
       }
       if (
@@ -174,37 +186,41 @@ export const PredictPage: React.FC = () => {
       ) {
         factors.push({
           key: 'curricular_units_1st_sem_grade',
-          label: 'Điểm TB Học kỳ 1',
-          value: values.curricular_units_1st_sem_grade,
+          label: 'Sem 1 Grade Average',
+          value: Number(values.curricular_units_1st_sem_grade),
           weight: 0.25,
           impact: 'increase',
-          description: 'Điểm trung bình Học kỳ 1 dưới 10/20 (+25% nguy cơ bỏ học).',
+          description: '1st semester grade average is below 10/20 (+25% dropout risk contribution).',
         });
       }
-      if (values.scholarship_holder === 1) {
+      if (Number(values.scholarship_holder) === 1) {
         factors.push({
           key: 'scholarship_holder',
-          label: 'Có học bổng',
+          label: 'Scholarship Holder',
           value: 1,
           weight: 0,
           impact: 'decrease',
-          description: 'Sinh viên thuộc diện có học bổng (yếu tố giảm thiểu rủi ro).',
+          description: 'Student holds a scholarship (protective factor against dropout).',
         });
       }
 
       const suggestions: string[] = [];
-      if (values.tuition_fees_up_to_date === 0 || values.debtor === 1) {
-        suggestions.push('Liên hệ phòng Tài chính hỗ trợ gia hạn hoặc chia nhỏ đợt đóng học phí.');
-        suggestions.push('Tư vấn các gói học bổng khuyến khích / hỗ trợ sinh viên khó khăn.');
+      if (Number(values.tuition_fees_up_to_date) === 0 || Number(values.debtor) === 1) {
+        suggestions.push(
+          'Contact the Financial Aid Office to arrange a tuition payment extension or installment plan.'
+        );
+        suggestions.push('Advise the student on emergency financial assistance or scholarship options.');
       }
       if (
         (stage === 'semester_1' || stage === 'semester_2') &&
         Number(values.curricular_units_1st_sem_grade ?? 20) < 10
       ) {
-        suggestions.push('Đặt lịch tư vấn học tập 1-1 và điều chỉnh khối lượng tín chỉ kỳ tới.');
+        suggestions.push(
+          'Schedule a 1-on-1 academic advising session and adjust next semester course load.'
+        );
       }
       if (suggestions.length === 0) {
-        suggestions.push('Tiếp tục duy trì tiến độ học tập và theo dõi định kỳ mỗi cuối kỳ.');
+        suggestions.push('Maintain regular semester check-ins; academic progress is stable.');
       }
 
       setExplain({
@@ -215,12 +231,21 @@ export const PredictPage: React.FC = () => {
         risk_level: res.data.risk_level,
         factors,
         suggestions,
-        note: 'Kết quả đã được lưu vào Nhật ký đánh giá.',
+        note: 'Evaluation saved to Prediction Logs.',
       });
 
-      message.success(`Đã đánh giá nguy cơ cho ${code} ở mốc ${STAGE_LABELS[stage]}!`);
+      message.success(
+        `Evaluated ${code} (${STAGE_LABELS[stage]}): ${res.data.risk_level} Risk (${Math.round(
+          res.data.risk_score * 100
+        )}%)`
+      );
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể chạy dự đoán');
+      const detail = err.response?.data?.detail;
+      message.error(
+        typeof detail === 'string'
+          ? detail
+          : 'Failed to run prediction. Please check that all required fields are valid.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -230,11 +255,11 @@ export const PredictPage: React.FC = () => {
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div>
         <Title level={3} style={{ margin: 0, color: '#0f172a' }}>
-          Đánh giá & Mô phỏng Nguy cơ Học vụ (3 Giai đoạn)
+          Multi-Stage Dropout Risk Assessment & What-If Simulator
         </Title>
         <Text type="secondary">
-          Chọn một sinh viên trong hệ thống để nạp tự động dữ liệu hoặc điều chỉnh thông số ("What-if")
-          để kiểm tra mức độ thay đổi rủi ro bỏ học.
+          Load an existing student record or modify input parameters ("What-if analysis") to
+          simulate how financial or academic interventions impact dropout risk.
         </Text>
       </div>
 
@@ -243,56 +268,60 @@ export const PredictPage: React.FC = () => {
         <Row gutter={[20, 16]} align="middle">
           <Col xs={24} lg={9}>
             <Text strong style={{ display: 'block', marginBottom: 6 }}>
-              1. Chọn sinh viên cần đánh giá (tự động nạp hồ sơ):
+              1. Select Student to Evaluate (Auto-fills Form):
             </Text>
             <Space.Compact style={{ width: '100%' }}>
               <AutoComplete
                 value={studentCode}
                 options={searchOptions}
                 onSearch={handleStudentSearch}
-                onSelect={(val) => loadStudentIntoForm(val)}
+                onSelect={(val) => loadStudentIntoForm(val, true)}
                 style={{ width: '100%' }}
               >
                 <Input
                   prefix={<SearchOutlined />}
-                  placeholder="Nhập mã SV (VD: SV0001, SV0012...)"
+                  placeholder="Enter Student ID (e.g., SV0001, SV0256...)"
                 />
               </AutoComplete>
               <Button
                 icon={<ReloadOutlined />}
-                onClick={() => loadStudentIntoForm(studentCode)}
+                onClick={() => loadStudentIntoForm(studentCode, true)}
               >
-                Nạp hồ sơ
+                Load Profile
               </Button>
               <Button
                 icon={<UserOutlined />}
                 onClick={() => navigate(`/students/${studentCode}`)}
               >
-                Xem HS
+                View Profile
               </Button>
             </Space.Compact>
           </Col>
 
           <Col xs={24} lg={15}>
             <Text strong style={{ display: 'block', marginBottom: 8 }}>
-              2. Chọn mốc thời gian dự báo (chống rò rỉ dữ liệu – Data Leakage):
+              2. Select Prediction Stage (Leakage-Aware Feature Sets):
             </Text>
             <Steps
               current={stageIdx}
-              onChange={(idx) => setStageIdx(idx)}
+              onChange={(idx) => {
+                setStageIdx(idx);
+                setResult(null);
+                setExplain(null);
+              }}
               size="small"
               items={[
                 {
-                  title: 'Khi nhập học',
-                  description: '24 chỉ số đầu vào',
+                  title: 'At Enrollment',
+                  description: '24 entry features',
                 },
                 {
-                  title: 'Sau Học kỳ 1',
-                  description: '30 chỉ số (+6 cột HK1)',
+                  title: 'After Semester 1',
+                  description: '30 features (+6 Sem 1)',
                 },
                 {
-                  title: 'Sau Học kỳ 2',
-                  description: '36 chỉ số (+6 cột HK2)',
+                  title: 'After Semester 2',
+                  description: '36 features (+6 Sem 2)',
                 },
               ]}
             />
@@ -307,9 +336,9 @@ export const PredictPage: React.FC = () => {
             title={
               <Space size={10} wrap style={{ paddingRight: 16 }}>
                 <ExperimentOutlined style={{ color: '#2563eb' }} />
-                <span>Thông số Đầu vào Mô hình</span>
+                <span>Model Input Features</span>
                 <Tag color="blue" style={{ margin: 0, fontWeight: 600 }}>
-                  Giai đoạn: {STAGE_LABELS[stage]}
+                  Stage: {STAGE_LABELS[stage]}
                 </Tag>
               </Space>
             }
@@ -318,10 +347,10 @@ export const PredictPage: React.FC = () => {
                 type="primary"
                 icon={<AlertOutlined />}
                 loading={submitting}
-                onClick={() => form.submit()}
+                onClick={() => handleRunPrediction()}
                 style={{ marginLeft: 12 }}
               >
-                Chạy Dự đoán & Lưu kết quả
+                Run Prediction & Save
               </Button>
             }
             bordered={false}
@@ -332,27 +361,16 @@ export const PredictPage: React.FC = () => {
                 defaultActiveKey={['financial', 'semester_1', 'semester_2', 'admission']}
                 items={Object.entries(groupedFields).map(([grp, fields]) => ({
                   key: grp,
+                  forceRender: true,
                   label: (
                     <Space>
                       <strong>{GROUP_LABELS[grp] || grp}</strong>
-                      <Tag>{fields.length} chỉ số</Tag>
+                      <Tag>{fields.length} features</Tag>
                     </Space>
                   ),
                   children: <MetaFormItems fields={fields} colSpan={8} />,
                 }))}
               />
-
-              <div style={{ marginTop: 16, textAlign: 'right' }}>
-                <Button
-                  type="primary"
-                  size="large"
-                  htmlType="submit"
-                  icon={<AlertOutlined />}
-                  loading={submitting}
-                >
-                  Chạy Dự đoán Nguy cơ ({STAGE_LABELS[stage]})
-                </Button>
-              </div>
             </Form>
           </Card>
         </Col>
@@ -360,36 +378,33 @@ export const PredictPage: React.FC = () => {
         {/* Right: Prediction Result & Explanation */}
         <Col xs={24} lg={9}>
           <Card
-            title="Kết quả Đánh giá & Giải thích Yếu tố"
+            title="Evaluation Result & Factor Breakdown"
             bordered={false}
             style={{ borderRadius: 12, position: 'sticky', top: 84 }}
           >
-            {explain ? (
+            {result && explain ? (
               <>
-                <RiskGauge
-                  score={result ? result.risk_score : explain.estimated_score}
-                  level={result ? result.risk_level : explain.risk_level}
+                <RiskGauge score={result.risk_score} level={result.risk_level} />
+
+                <Alert
+                  type="success"
+                  showIcon
+                  style={{ marginTop: 12 }}
+                  message={`Saved Evaluation #${result.id} for ${result.student_code}`}
+                  description={`Predicted Outcome: ${result.predicted_label} · Stage: ${
+                    STAGE_LABELS[result.stage] || result.stage
+                  }`}
                 />
 
-                {result && (
-                  <Alert
-                    type="success"
-                    showIcon
-                    style={{ marginTop: 12 }}
-                    message={`Đã lưu bản ghi đánh giá #${result.id} cho ${result.student_code}`}
-                    description={`Nhãn xu hướng dự báo: ${result.predicted_label}`}
-                  />
-                )}
-
                 <Divider style={{ margin: '16px 0 12px' }} orientation="left">
-                  Yếu tố tác động chính
+                  Key Contributing Factors
                 </Divider>
 
                 {explain.factors.length === 0 ? (
                   <Alert
                     type="success"
                     showIcon
-                    message="Không có yếu tố rủi ro tài chính hoặc điểm số thấp."
+                    message="No financial or low-grade risk triggers detected."
                   />
                 ) : (
                   <List
@@ -401,9 +416,9 @@ export const PredictPage: React.FC = () => {
                           title={
                             <Space>
                               {f.impact === 'increase' ? (
-                                <Tag color="error">+{Math.round(f.weight * 100)}%</Tag>
+                                <Tag color="error">+{Math.round(f.weight * 100)}% Risk</Tag>
                               ) : (
-                                <Tag color="success">Giảm nhẹ</Tag>
+                                <Tag color="success">Protective</Tag>
                               )}
                               <Text strong>{f.label}</Text>
                             </Space>
@@ -416,7 +431,7 @@ export const PredictPage: React.FC = () => {
                 )}
 
                 <Divider style={{ margin: '16px 0 12px' }} orientation="left">
-                  Khuyến nghị can thiệp
+                  Recommended Interventions
                 </Divider>
                 <List
                   size="small"
@@ -432,11 +447,32 @@ export const PredictPage: React.FC = () => {
                 />
               </>
             ) : (
-              <Alert
-                type="info"
-                showIcon
-                message="Nhấn 'Chạy Dự đoán' để tính điểm rủi ro bỏ học."
-              />
+              <div style={{ padding: '24px 8px', textAlign: 'center' }}>
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={
+                    <Space direction="vertical" size={4}>
+                      <Text strong style={{ color: '#0f172a' }}>
+                        Ready to Evaluate {studentCode} ({STAGE_LABELS[stage]})
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 13 }}>
+                        Review or adjust any input features on the left, then click the button below
+                        to compute the risk score and save the evaluation.
+                      </Text>
+                    </Space>
+                  }
+                >
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<AlertOutlined />}
+                    loading={submitting}
+                    onClick={() => handleRunPrediction()}
+                  >
+                    Run Prediction & Save ({STAGE_LABELS[stage]})
+                  </Button>
+                </Empty>
+              </div>
             )}
           </Card>
         </Col>
@@ -444,4 +480,3 @@ export const PredictPage: React.FC = () => {
     </Space>
   );
 };
-

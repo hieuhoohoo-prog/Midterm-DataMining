@@ -45,7 +45,7 @@ export const PredictionHistoryPage: React.FC = () => {
       });
       setData(res.data);
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Không thể tải lịch sử đánh giá');
+      message.error(err.response?.data?.detail || 'Failed to load prediction logs');
     } finally {
       setLoading(false);
     }
@@ -59,10 +59,11 @@ export const PredictionHistoryPage: React.FC = () => {
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div>
         <Title level={3} style={{ margin: 0, color: '#0f172a' }}>
-          Nhật ký Đánh giá Nguy cơ Học vụ
+          Dropout Risk Prediction Logs
         </Title>
         <Text type="secondary">
-          Lưu vết toàn bộ các lần dự đoán rủi ro sinh viên của Cố vấn học tập và Quản trị viên.
+          Complete audit log of all student risk evaluations performed by Academic Advisors and
+          Administrators.
         </Text>
       </div>
 
@@ -71,7 +72,7 @@ export const PredictionHistoryPage: React.FC = () => {
           <Col xs={24} sm={8} md={6}>
             <Input
               prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="Lọc theo mã SV (VD: SV0001)..."
+              placeholder="Filter by Student ID (e.g., SV0001)..."
               value={studentCode}
               onChange={(e) => {
                 setStudentCode(e.target.value);
@@ -84,7 +85,7 @@ export const PredictionHistoryPage: React.FC = () => {
           <Col xs={12} sm={8} md={5}>
             <Select
               allowClear
-              placeholder="Giai đoạn dự báo"
+              placeholder="Prediction Stage"
               style={{ width: '100%' }}
               value={stage}
               onChange={(v) => {
@@ -92,9 +93,9 @@ export const PredictionHistoryPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 'enrollment', label: 'Khi nhập học' },
-                { value: 'semester_1', label: 'Sau Học kỳ 1' },
-                { value: 'semester_2', label: 'Sau Học kỳ 2' },
+                { value: 'enrollment', label: 'At Enrollment' },
+                { value: 'semester_1', label: 'After Semester 1' },
+                { value: 'semester_2', label: 'After Semester 2' },
               ]}
             />
           </Col>
@@ -102,7 +103,7 @@ export const PredictionHistoryPage: React.FC = () => {
           <Col xs={12} sm={8} md={5}>
             <Select
               allowClear
-              placeholder="Mức độ rủi ro"
+              placeholder="Risk Level"
               style={{ width: '100%' }}
               value={riskLevel}
               onChange={(v) => {
@@ -110,9 +111,9 @@ export const PredictionHistoryPage: React.FC = () => {
                 setPage(1);
               }}
               options={[
-                { value: 'High', label: 'Nguy cơ Cao' },
-                { value: 'Medium', label: 'Nguy cơ Vừa' },
-                { value: 'Low', label: 'Nguy cơ Thấp' },
+                { value: 'High', label: 'High Risk' },
+                { value: 'Medium', label: 'Medium Risk' },
+                { value: 'Low', label: 'Low Risk' },
               ]}
             />
           </Col>
@@ -120,7 +121,7 @@ export const PredictionHistoryPage: React.FC = () => {
           <Col xs={24} md={8} style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Space>
               <Tag color="blue" style={{ padding: '4px 10px' }}>
-                Tổng số: <strong>{data?.total ?? 0}</strong> lượt đánh giá
+                Total Evaluations: <strong>{data?.total ?? 0}</strong>
               </Tag>
               <Button
                 icon={<ReloadOutlined />}
@@ -131,7 +132,7 @@ export const PredictionHistoryPage: React.FC = () => {
                   setPage(1);
                 }}
               >
-                Đặt lại
+                Reset
               </Button>
             </Space>
           </Col>
@@ -155,13 +156,13 @@ export const PredictionHistoryPage: React.FC = () => {
           }}
           columns={[
             {
-              title: 'ID',
+              title: 'Run ID',
               dataIndex: 'id',
               width: 80,
               render: (id: number) => `#${id}`,
             },
             {
-              title: 'Mã sinh viên',
+              title: 'Student ID',
               dataIndex: 'student_code',
               width: 130,
               render: (code: string) => (
@@ -175,42 +176,42 @@ export const PredictionHistoryPage: React.FC = () => {
               ),
             },
             {
-              title: 'Giai đoạn đánh giá',
+              title: 'Prediction Stage',
               dataIndex: 'stage',
               width: 160,
               render: (st: string) => <Tag color="blue">{STAGE_LABELS[st] || st}</Tag>,
             },
             {
-              title: 'Điểm rủi ro',
+              title: 'Risk Score',
               dataIndex: 'risk_score',
               width: 130,
               render: (sc: number) => <strong>{Math.round(sc * 100)}% ({sc.toFixed(2)})</strong>,
             },
             {
-              title: 'Mức độ rủi ro',
+              title: 'Risk Level',
               dataIndex: 'risk_level',
               width: 180,
               render: (lv: string, r: PredictionOut) => renderRiskTag(lv, r.risk_score),
             },
             {
-              title: 'Xu hướng dự báo',
+              title: 'Predicted Outcome',
               dataIndex: 'predicted_label',
               width: 150,
               render: (lb: string) => renderTargetTag(lb),
             },
             {
-              title: 'Cán bộ thực hiện',
+              title: 'Evaluated By',
               dataIndex: 'evaluator_name',
               render: (name: string, r: PredictionOut) => name || `User #${r.evaluated_by}`,
             },
             {
-              title: 'Thời gian',
+              title: 'Timestamp',
               dataIndex: 'created_at',
               width: 180,
-              render: (dt: string) => new Date(dt).toLocaleString('vi-VN'),
+              render: (dt: string) => new Date(dt).toLocaleString('en-US'),
             },
             {
-              title: 'Hồ sơ',
+              title: 'Profile',
               key: 'act',
               width: 110,
               align: 'right',
@@ -220,7 +221,7 @@ export const PredictionHistoryPage: React.FC = () => {
                   icon={<EyeOutlined />}
                   onClick={() => navigate(`/students/${r.student_code}`)}
                 >
-                  Xem SV
+                  View
                 </Button>
               ),
             },
@@ -230,4 +231,3 @@ export const PredictionHistoryPage: React.FC = () => {
     </Space>
   );
 };
-
