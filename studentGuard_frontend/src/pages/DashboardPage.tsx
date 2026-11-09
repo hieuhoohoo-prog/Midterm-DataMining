@@ -182,9 +182,12 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* KPI Row */}
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} align="stretch">
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <Card
+            bordered={false}
+            style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', height: '100%' }}
+          >
             <Statistic
               title={<Text type="secondary">Total Student Population</Text>}
               value={overview.total_students}
@@ -192,14 +195,17 @@ export const DashboardPage: React.FC = () => {
               suffix={<Text type="secondary" style={{ fontSize: 13 }}>/ {overview.total_courses} programs</Text>}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Mean Admission: <strong>{overview.averages.admission_grade}</strong>/200 · Mean Age:{' '}
+              Admission Avg: <strong>{overview.averages.admission_grade}</strong> · Age Avg:{' '}
               <strong>{overview.averages.age_at_enrollment}</strong>
             </div>
           </Card>
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <Card
+            bordered={false}
+            style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', height: '100%' }}
+          >
             <Statistic
               title={<Text type="secondary">Dropout Count & Rate</Text>}
               value={overview.by_target.Dropout || 0}
@@ -219,7 +225,10 @@ export const DashboardPage: React.FC = () => {
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <Card
+            bordered={false}
+            style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', height: '100%' }}
+          >
             <Statistic
               title={<Text type="secondary">Graduated On Time</Text>}
               value={overview.by_target.Graduate || 0}
@@ -232,14 +241,17 @@ export const DashboardPage: React.FC = () => {
               }
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Mean Grade Sem 1: <strong>{overview.averages.semester_1_grade}</strong> · Sem 2:{' '}
-              <strong>{overview.averages.semester_2_grade}</strong>/20
+              Mean GPA — Sem 1: <strong>{overview.averages.semester_1_grade}</strong> · Sem 2:{' '}
+              <strong>{overview.averages.semester_2_grade}</strong>
             </div>
           </Card>
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+          <Card
+            bordered={false}
+            style={{ borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', height: '100%' }}
+          >
             <Statistic
               title={<Text type="secondary">Financial Risk Flags</Text>}
               value={overview.financial.tuition_not_up_to_date}
@@ -248,7 +260,7 @@ export const DashboardPage: React.FC = () => {
               suffix={<Text type="secondary" style={{ fontSize: 13 }}>Tuition Overdue</Text>}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#64748b' }}>
-              Active Debtors: <strong>{overview.financial.debtors}</strong> · Scholarships:{' '}
+              Debtors: <strong>{overview.financial.debtors}</strong> · Scholarships:{' '}
               <strong>{overview.financial.scholarship_holders}</strong>
             </div>
           </Card>

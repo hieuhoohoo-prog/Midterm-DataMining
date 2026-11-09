@@ -355,7 +355,7 @@ export const StudentListPage: React.FC = () => {
           rowKey="student_code"
           loading={loading}
           dataSource={data?.items || []}
-          scroll={{ x: 1150 }}
+          size="middle"
           pagination={{
             current: page,
             pageSize,
@@ -372,8 +372,7 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Student ID',
               dataIndex: 'student_code',
-              width: 110,
-              fixed: 'left',
+              width: 95,
               render: (code: string) => (
                 <Button
                   type="link"
@@ -387,44 +386,30 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Course / Program',
               dataIndex: 'course_name',
-              width: 225,
+              ellipsis: true,
               render: (name: string, r: StudentListItem) => (
                 <div>
-                  <div style={{ fontWeight: 500, color: '#0f172a' }}>
+                  <div style={{ fontWeight: 500, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {name || `Course #${r.course}`}
                   </div>
                   <div style={{ fontSize: 11, color: '#64748b' }}>
-                    Code: {r.course} · {r.daytime_evening_attendance === 1 ? 'Daytime' : 'Evening'}
+                    #{r.course} · {r.daytime_evening_attendance === 1 ? 'Daytime' : 'Evening'} ·{' '}
+                    {r.gender === 1 ? 'Male' : 'Female'}, Age {r.age_at_enrollment}
                   </div>
-                </div>
-              ),
-            },
-            {
-              title: 'Demographics',
-              key: 'personal',
-              width: 120,
-              render: (_: any, r: StudentListItem) => (
-                <div>
-                  <Tag style={{ margin: 0 }} color={r.gender === 1 ? 'geekblue' : 'magenta'}>
-                    {r.gender === 1 ? 'Male' : 'Female'}
-                  </Tag>
-                  <span style={{ marginLeft: 6, fontSize: 12, color: '#475569' }}>
-                    Age {r.age_at_enrollment}
-                  </span>
                 </div>
               ),
             },
             {
               title: 'Admission',
               dataIndex: 'admission_grade',
-              width: 95,
+              width: 90,
               align: 'right',
               render: (v: number) => <Text>{v.toFixed(1)}</Text>,
             },
             {
-              title: 'Sem 1 (GPA / Passed)',
+              title: 'Sem 1 GPA',
               key: 'sem1',
-              width: 155,
+              width: 115,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -436,17 +421,17 @@ export const StudentListPage: React.FC = () => {
                   >
                     {r.curricular_units_1st_sem_grade.toFixed(2)}
                   </Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
                     {' '}
-                    ({r.curricular_units_1st_sem_approved} units)
+                    ({r.curricular_units_1st_sem_approved}u)
                   </Text>
                 </div>
               ),
             },
             {
-              title: 'Sem 2 (GPA / Passed)',
+              title: 'Sem 2 GPA',
               key: 'sem2',
-              width: 155,
+              width: 115,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -458,9 +443,9 @@ export const StudentListPage: React.FC = () => {
                   >
                     {r.curricular_units_2nd_sem_grade.toFixed(2)}
                   </Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
                     {' '}
-                    ({r.curricular_units_2nd_sem_approved} units)
+                    ({r.curricular_units_2nd_sem_approved}u)
                   </Text>
                 </div>
               ),
@@ -468,40 +453,39 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Financial Status',
               key: 'finance',
-              width: 190,
+              width: 170,
               render: (_: any, r: StudentListItem) => (
                 <Space size={4} wrap>
                   {r.tuition_fees_up_to_date === 1 ? (
-                    <Tag color="default">Tuition Paid</Tag>
+                    <Tag color="default" style={{ margin: 0 }}>Tuition Paid</Tag>
                   ) : (
-                    <Tag color="error">Tuition Overdue</Tag>
+                    <Tag color="error" style={{ margin: 0 }}>Overdue</Tag>
                   )}
-                  {r.debtor === 1 && <Tag color="warning">Debtor</Tag>}
-                  {r.scholarship_holder === 1 && <Tag color="success">Scholarship</Tag>}
+                  {r.debtor === 1 && <Tag color="warning" style={{ margin: 0 }}>Debtor</Tag>}
+                  {r.scholarship_holder === 1 && <Tag color="success" style={{ margin: 0 }}>Scholarship</Tag>}
                 </Space>
               ),
             },
             {
               title: 'Outcome',
               dataIndex: 'target',
-              width: 130,
+              width: 115,
               render: (t: string) => renderTargetTag(t),
             },
             {
               title: 'Latest Risk',
               key: 'risk',
-              width: 165,
+              width: 150,
               render: (_: any, r: StudentListItem) =>
                 renderRiskTag(r.latest_risk_level, r.latest_risk_score),
             },
             {
               title: 'Actions',
               key: 'actions',
-              fixed: 'right',
-              width: 185,
+              width: 165,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
-                <Space>
+                <Space size={6}>
                   <Button
                     size="small"
                     icon={<EyeOutlined />}
