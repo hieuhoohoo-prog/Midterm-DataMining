@@ -13,6 +13,7 @@ No new database tables or columns are created: everything is computed from
 the existing `users`, `students` and `prediction_history` tables.
 """
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -20,10 +21,32 @@ from typing import Dict, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, create_model
-from sqlalchemy import func, or_
+from sqlalchemy import event, exc, func, or_
 from sqlalchemy.orm import Session
 
 import database, models, schemas, security
+
+_DB_FILE_PATH = Path(__file__).resolve().parent / "student_guard.db"
+
+
+def _current_db_inode() -> Optional[int]:
+    try:
+        return os.stat(_DB_FILE_PATH).st_ino
+    except OSError:
+        return None
+
+
+@event.listens_for(database.engine, "connect")
+def _record_sqlite_inode(dbapi_connection, connection_record):
+    connection_record.info["db_ino"] = _current_db_inode()
+
+
+@event.listens_for(database.engine, "checkout")
+def _verify_sqlite_inode(dbapi_connection, connection_record, connection_proxy):
+    current_ino = _current_db_inode()
+    if current_ino is not None and connection_record.info.get("db_ino") != current_ino:
+        raise exc.DisconnectionError("SQLite database file changed on disk; reconnecting.")
+
 
 router = APIRouter()
 
