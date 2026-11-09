@@ -220,19 +220,44 @@ export const StudentDetailPage: React.FC = () => {
             <Space size={16} align="start">
               <div
                 style={{
-                  width: 64,
-                  height: 64,
+                  width: 68,
+                  height: 68,
                   borderRadius: 16,
-                  background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+                  background: 'linear-gradient(145deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%)',
                   color: '#fff',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 26,
-                  fontWeight: 700,
+                  padding: '8px 10px',
+                  boxShadow: '0 8px 20px rgba(37, 99, 235, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  flexShrink: 0,
                 }}
               >
-                {s.student_code.replace('SV', '')}
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    letterSpacing: 1.5,
+                    color: 'rgba(255, 255, 255, 0.78)',
+                    textTransform: 'uppercase',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  ID · SV
+                </span>
+                <span
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    letterSpacing: 0.5,
+                    lineHeight: 1.3,
+                    marginTop: 3,
+                  }}
+                >
+                  {s.student_code.replace('SV', '')}
+                </span>
               </div>
               <div>
                 <Space size={10} align="center" wrap>

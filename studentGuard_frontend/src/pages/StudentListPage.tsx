@@ -350,12 +350,17 @@ export const StudentListPage: React.FC = () => {
       </Card>
 
       {/* Main Directory Table */}
-      <Card bordered={false} style={{ borderRadius: 12 }}>
+      <Card
+        bordered={false}
+        style={{ borderRadius: 12, overflow: 'hidden' }}
+        styles={{ body: { padding: '16px 20px' } }}
+      >
         <Table
+          className="sg-directory-table"
           rowKey="student_code"
           loading={loading}
           dataSource={data?.items || []}
-          size="middle"
+          scroll={{ x: 1380 }}
           pagination={{
             current: page,
             pageSize,
@@ -372,7 +377,8 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Student ID',
               dataIndex: 'student_code',
-              width: 95,
+              width: 115,
+              fixed: 'left',
               render: (code: string) => (
                 <Button
                   type="link"
@@ -386,30 +392,44 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Course / Program',
               dataIndex: 'course_name',
-              ellipsis: true,
+              width: 240,
               render: (name: string, r: StudentListItem) => (
                 <div>
-                  <div style={{ fontWeight: 500, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontWeight: 500, color: '#0f172a' }}>
                     {name || `Course #${r.course}`}
                   </div>
                   <div style={{ fontSize: 11, color: '#64748b' }}>
-                    #{r.course} · {r.daytime_evening_attendance === 1 ? 'Daytime' : 'Evening'} ·{' '}
-                    {r.gender === 1 ? 'Male' : 'Female'}, Age {r.age_at_enrollment}
+                    Code: {r.course} · {r.daytime_evening_attendance === 1 ? 'Daytime' : 'Evening'}
                   </div>
+                </div>
+              ),
+            },
+            {
+              title: 'Demographics',
+              key: 'personal',
+              width: 135,
+              render: (_: any, r: StudentListItem) => (
+                <div>
+                  <Tag style={{ margin: 0 }} color={r.gender === 1 ? 'geekblue' : 'magenta'}>
+                    {r.gender === 1 ? 'Male' : 'Female'}
+                  </Tag>
+                  <span style={{ marginLeft: 6, fontSize: 12, color: '#475569' }}>
+                    Age {r.age_at_enrollment}
+                  </span>
                 </div>
               ),
             },
             {
               title: 'Admission',
               dataIndex: 'admission_grade',
-              width: 90,
+              width: 105,
               align: 'right',
               render: (v: number) => <Text>{v.toFixed(1)}</Text>,
             },
             {
-              title: 'Sem 1 GPA',
+              title: 'Sem 1 (GPA / Passed)',
               key: 'sem1',
-              width: 115,
+              width: 165,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -421,17 +441,17 @@ export const StudentListPage: React.FC = () => {
                   >
                     {r.curricular_units_1st_sem_grade.toFixed(2)}
                   </Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
                     {' '}
-                    ({r.curricular_units_1st_sem_approved}u)
+                    ({r.curricular_units_1st_sem_approved} units)
                   </Text>
                 </div>
               ),
             },
             {
-              title: 'Sem 2 GPA',
+              title: 'Sem 2 (GPA / Passed)',
               key: 'sem2',
-              width: 115,
+              width: 165,
               align: 'right',
               render: (_: any, r: StudentListItem) => (
                 <div>
@@ -443,9 +463,9 @@ export const StudentListPage: React.FC = () => {
                   >
                     {r.curricular_units_2nd_sem_grade.toFixed(2)}
                   </Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
                     {' '}
-                    ({r.curricular_units_2nd_sem_approved}u)
+                    ({r.curricular_units_2nd_sem_approved} units)
                   </Text>
                 </div>
               ),
@@ -453,13 +473,13 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Financial Status',
               key: 'finance',
-              width: 170,
+              width: 210,
               render: (_: any, r: StudentListItem) => (
                 <Space size={4} wrap>
                   {r.tuition_fees_up_to_date === 1 ? (
                     <Tag color="default" style={{ margin: 0 }}>Tuition Paid</Tag>
                   ) : (
-                    <Tag color="error" style={{ margin: 0 }}>Overdue</Tag>
+                    <Tag color="error" style={{ margin: 0 }}>Tuition Overdue</Tag>
                   )}
                   {r.debtor === 1 && <Tag color="warning" style={{ margin: 0 }}>Debtor</Tag>}
                   {r.scholarship_holder === 1 && <Tag color="success" style={{ margin: 0 }}>Scholarship</Tag>}
@@ -469,23 +489,24 @@ export const StudentListPage: React.FC = () => {
             {
               title: 'Outcome',
               dataIndex: 'target',
-              width: 115,
+              width: 130,
               render: (t: string) => renderTargetTag(t),
             },
             {
               title: 'Latest Risk',
               key: 'risk',
-              width: 150,
+              width: 170,
               render: (_: any, r: StudentListItem) =>
                 renderRiskTag(r.latest_risk_level, r.latest_risk_score),
             },
             {
               title: 'Actions',
               key: 'actions',
-              width: 165,
-              align: 'right',
+              fixed: 'right',
+              width: 215,
+              align: 'center',
               render: (_: any, r: StudentListItem) => (
-                <Space size={6}>
+                <Space size={8}>
                   <Button
                     size="small"
                     icon={<EyeOutlined />}
