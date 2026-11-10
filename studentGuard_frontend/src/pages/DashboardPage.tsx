@@ -68,35 +68,35 @@ const GROUP_FIELD_OPTIONS = [
 const HISTOGRAM_FIELD_OPTIONS = [
   {
     value: 'curricular_units_1st_sem_grade',
-    label: 'Sem 1 GPA (0–20 pts)',
-    title: 'Semester 1 Grade Average Distribution (0–20 Scale)',
+    label: 'Sem 1 GPA',
+    title: 'Semester 1 GPA Distribution',
     xAxisLabel: 'Semester 1 GPA Range (points out of 20)',
     unit: 'pts',
-    categoryTag: 'Grade Metric (0–20 pts)',
+    categoryTag: 'Grade (0–20 pts)',
   },
   {
     value: 'curricular_units_2nd_sem_grade',
-    label: 'Sem 2 GPA (0–20 pts)',
-    title: 'Semester 2 Grade Average Distribution (0–20 Scale)',
+    label: 'Sem 2 GPA',
+    title: 'Semester 2 GPA Distribution',
     xAxisLabel: 'Semester 2 GPA Range (points out of 20)',
     unit: 'pts',
-    categoryTag: 'Grade Metric (0–20 pts)',
+    categoryTag: 'Grade (0–20 pts)',
   },
   {
     value: 'admission_grade',
-    label: 'Admission Score (0–200 pts)',
-    title: 'Admission Exam Grade Distribution (0–200 Scale)',
+    label: 'Admission Grade',
+    title: 'Admission Score Distribution',
     xAxisLabel: 'Admission Grade Range (points out of 200)',
     unit: 'pts',
-    categoryTag: 'Grade Metric (0–200 pts)',
+    categoryTag: 'Grade (0–200 pts)',
   },
   {
     value: 'age_at_enrollment',
-    label: 'Enrollment Age (Years)',
-    title: 'Student Age at Enrollment Distribution (Years Old)',
+    label: 'Enrollment Age',
+    title: 'Enrollment Age Distribution',
     xAxisLabel: 'Student Age Range at Enrollment (years old)',
     unit: 'yrs',
-    categoryTag: 'Age Metric (years old)',
+    categoryTag: 'Age (Years Old)',
   },
 ];
 
@@ -421,12 +421,15 @@ export const DashboardPage: React.FC = () => {
       {/* Chart Row 2: Numeric Distribution Histogram */}
       <Card
         title={
-          <Space wrap size={8}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
             <span>{activeHistMeta.title}</span>
-            <Tag color={histField === 'age_at_enrollment' ? 'purple' : 'blue'}>
+            <Tag
+              color={histField === 'age_at_enrollment' ? 'purple' : 'blue'}
+              style={{ margin: 0 }}
+            >
               {activeHistMeta.categoryTag}
             </Tag>
-          </Space>
+          </div>
         }
         extra={
           <Space wrap size={6}>
