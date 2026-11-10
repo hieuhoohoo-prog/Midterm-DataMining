@@ -13,6 +13,7 @@ No new database tables or columns are created: everything is computed from
 the existing `users`, `students` and `prediction_history` tables.
 """
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -20,10 +21,32 @@ from typing import Dict, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, create_model
-from sqlalchemy import func, or_
+from sqlalchemy import event, exc, func, or_
 from sqlalchemy.orm import Session
 
 import database, models, schemas, security
+
+_DB_FILE_PATH = Path(__file__).resolve().parent / "student_guard.db"
+
+
+def _current_db_inode() -> Optional[int]:
+    try:
+        return os.stat(_DB_FILE_PATH).st_ino
+    except OSError:
+        return None
+
+
+@event.listens_for(database.engine, "connect")
+def _record_sqlite_inode(dbapi_connection, connection_record):
+    connection_record.info["db_ino"] = _current_db_inode()
+
+
+@event.listens_for(database.engine, "checkout")
+def _verify_sqlite_inode(dbapi_connection, connection_record, connection_proxy):
+    current_ino = _current_db_inode()
+    if current_ino is not None and connection_record.info.get("db_ino") != current_ino:
+        raise exc.DisconnectionError("SQLite database file changed on disk; reconnecting.")
+
 
 router = APIRouter()
 
@@ -903,6 +926,36 @@ def list_predictions(
         total=total, page=page, page_size=page_size, total_pages=_pages(total, page_size),
         items=[_prediction_out(r, names) for r in records],
     )
+
+
+@router.delete("/api/predictions", tags=["3. Risk Prediction"])
+def clear_prediction_history(
+    student_code: Optional[str] = Query(None, description="Optional student code filter"),
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.require_advisor_or_admin),
+):
+    """Clear prediction logs (all logs or filtered by student_code)."""
+    query = db.query(PH)
+    if student_code:
+        query = query.filter(PH.student_code == student_code.strip())
+    deleted = query.delete(synchronize_session=False)
+    db.commit()
+    return {"detail": f"Cleared {deleted} prediction log(s)", "deleted": deleted}
+
+
+@router.delete("/api/predictions/{prediction_id}", tags=["3. Risk Prediction"])
+def delete_single_prediction(
+    prediction_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.require_advisor_or_admin),
+):
+    """Delete a single prediction log entry by ID."""
+    record = db.query(PH).filter(PH.id == prediction_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Prediction log not found")
+    db.delete(record)
+    db.commit()
+    return {"detail": f"Prediction log #{prediction_id} deleted"}
 
 
 # ==========================================

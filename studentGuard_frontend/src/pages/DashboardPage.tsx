@@ -5,7 +5,6 @@ import {
   Card,
   Col,
   Row,
-  Segmented,
   Select,
   Skeleton,
   Space,
@@ -67,10 +66,38 @@ const GROUP_FIELD_OPTIONS = [
 ];
 
 const HISTOGRAM_FIELD_OPTIONS = [
-  { value: 'curricular_units_1st_sem_grade', label: 'Sem 1 Grade Avg (0–20)' },
-  { value: 'curricular_units_2nd_sem_grade', label: 'Sem 2 Grade Avg (0–20)' },
-  { value: 'admission_grade', label: 'Admission Grade (0–200)' },
-  { value: 'age_at_enrollment', label: 'Age at Enrollment' },
+  {
+    value: 'curricular_units_1st_sem_grade',
+    label: 'Sem 1 GPA',
+    title: 'Semester 1 GPA Distribution',
+    xAxisLabel: 'Semester 1 GPA Range (points out of 20)',
+    unit: 'pts',
+    categoryTag: 'Grade (0–20 pts)',
+  },
+  {
+    value: 'curricular_units_2nd_sem_grade',
+    label: 'Sem 2 GPA',
+    title: 'Semester 2 GPA Distribution',
+    xAxisLabel: 'Semester 2 GPA Range (points out of 20)',
+    unit: 'pts',
+    categoryTag: 'Grade (0–20 pts)',
+  },
+  {
+    value: 'admission_grade',
+    label: 'Admission Grade',
+    title: 'Admission Score Distribution',
+    xAxisLabel: 'Admission Grade Range (points out of 200)',
+    unit: 'pts',
+    categoryTag: 'Grade (0–200 pts)',
+  },
+  {
+    value: 'age_at_enrollment',
+    label: 'Enrollment Age',
+    title: 'Enrollment Age Distribution',
+    xAxisLabel: 'Student Age Range at Enrollment (years old)',
+    unit: 'yrs',
+    categoryTag: 'Age (Years Old)',
+  },
 ];
 
 export const DashboardPage: React.FC = () => {
@@ -148,8 +175,13 @@ export const DashboardPage: React.FC = () => {
     };
   });
 
+  const activeHistMeta =
+    HISTOGRAM_FIELD_OPTIONS.find((opt) => opt.value === histField) || HISTOGRAM_FIELD_OPTIONS[0];
+
   const histChartData = histData.map((b) => ({
-    range: `${b.start}–${b.end}`,
+    range: `${b.start}–${b.end} ${activeHistMeta.unit}`,
+    rawRange: `${b.start}–${b.end}`,
+    total: b.total,
     Dropout: b.counts.Dropout || 0,
     Enrolled: b.counts.Enrolled || 0,
     Graduate: b.counts.Graduate || 0,
@@ -315,8 +347,8 @@ export const DashboardPage: React.FC = () => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={62}
-                    outerRadius={98}
+                    innerRadius={52}
+                    outerRadius={82}
                     paddingAngle={3}
                     label={({ name, pct }) => `${name}: ${pct}%`}
                   >
@@ -388,25 +420,69 @@ export const DashboardPage: React.FC = () => {
 
       {/* Chart Row 2: Numeric Distribution Histogram */}
       <Card
-        title="Grade & Age Distribution by Academic Outcome"
+        title={
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <span>{activeHistMeta.title}</span>
+            <Tag
+              color={histField === 'age_at_enrollment' ? 'purple' : 'blue'}
+              style={{ margin: 0 }}
+            >
+              {activeHistMeta.categoryTag}
+            </Tag>
+          </div>
+        }
         extra={
-          <Segmented
-            value={histField}
-            onChange={(val) => setHistField(String(val))}
-            options={HISTOGRAM_FIELD_OPTIONS}
-          />
+          <Space wrap size={6}>
+            {HISTOGRAM_FIELD_OPTIONS.map((opt) => (
+              <Button
+                key={opt.value}
+                size="small"
+                type={histField === opt.value ? 'primary' : 'default'}
+                onClick={() => setHistField(opt.value)}
+                style={{ fontWeight: histField === opt.value ? 600 : 400 }}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </Space>
         }
         bordered={false}
         style={{ borderRadius: 12 }}
       >
-        <div style={{ width: '100%', height: 280 }}>
+        <div style={{ width: '100%', height: 300 }}>
           <ResponsiveContainer>
-            <BarChart data={histChartData} margin={{ top: 10, right: 16, left: 0, bottom: 5 }}>
+            <BarChart data={histChartData} margin={{ top: 6, right: 16, left: 8, bottom: 22 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="range" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Legend />
+              <XAxis
+                dataKey="range"
+                tick={{ fontSize: 12, fill: '#334155', fontWeight: 500 }}
+                label={{
+                  value: activeHistMeta.xAxisLabel,
+                  position: 'insideBottom',
+                  offset: -14,
+                  style: { fontSize: 12, fill: '#475569', fontWeight: 600 },
+                }}
+              />
+              <YAxis
+                tick={{ fontSize: 12 }}
+                label={{
+                  value: 'Number of Students',
+                  angle: -90,
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle', fontSize: 12, fill: '#475569', fontWeight: 600 },
+                }}
+              />
+              <Tooltip
+                formatter={(value: number, name: string) => [`${value} students`, name]}
+                labelFormatter={(label, payload) => {
+                  const total = payload?.[0]?.payload?.total;
+                  const prefix = histField === 'age_at_enrollment' ? 'Age Group' : 'Grade Range';
+                  return total !== undefined
+                    ? `${prefix}: ${label} (Total: ${total} students)`
+                    : `${prefix}: ${label}`;
+                }}
+              />
+              <Legend verticalAlign="top" height={34} />
               <Bar dataKey="Graduate" stackId="a" fill="#16a34a" />
               <Bar dataKey="Enrolled" stackId="a" fill="#2563eb" />
               <Bar dataKey="Dropout" stackId="a" fill="#dc2626" radius={[4, 4, 0, 0]} />
