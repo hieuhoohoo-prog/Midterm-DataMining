@@ -928,6 +928,36 @@ def list_predictions(
     )
 
 
+@router.delete("/api/predictions", tags=["3. Risk Prediction"])
+def clear_prediction_history(
+    student_code: Optional[str] = Query(None, description="Optional student code filter"),
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.require_advisor_or_admin),
+):
+    """Clear prediction logs (all logs or filtered by student_code)."""
+    query = db.query(PH)
+    if student_code:
+        query = query.filter(PH.student_code == student_code.strip())
+    deleted = query.delete(synchronize_session=False)
+    db.commit()
+    return {"detail": f"Cleared {deleted} prediction log(s)", "deleted": deleted}
+
+
+@router.delete("/api/predictions/{prediction_id}", tags=["3. Risk Prediction"])
+def delete_single_prediction(
+    prediction_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(security.require_advisor_or_admin),
+):
+    """Delete a single prediction log entry by ID."""
+    record = db.query(PH).filter(PH.id == prediction_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Prediction log not found")
+    db.delete(record)
+    db.commit()
+    return {"detail": f"Prediction log #{prediction_id} deleted"}
+
+
 # ==========================================
 # 5. ACCOUNT MANAGEMENT (complements the existing /api/users endpoints)
 # ==========================================

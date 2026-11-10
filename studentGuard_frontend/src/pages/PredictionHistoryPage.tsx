@@ -4,6 +4,7 @@ import {
   Card,
   Col,
   Input,
+  Popconfirm,
   Row,
   Select,
   Space,
@@ -12,7 +13,7 @@ import {
   Typography,
   message,
 } from 'antd';
-import { EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { PredictionOut, PredictionPage } from '../types';
@@ -55,6 +56,30 @@ export const PredictionHistoryPage: React.FC = () => {
     fetchHistory();
   }, [studentCode, stage, riskLevel, page, pageSize]);
 
+  const handleClearAllLogs = async () => {
+    try {
+      await api.delete('/api/predictions');
+      message.success('All prediction logs have been cleared.');
+      setStudentCode('');
+      setStage(undefined);
+      setRiskLevel(undefined);
+      setPage(1);
+      fetchHistory();
+    } catch (err: any) {
+      message.error(err.response?.data?.detail || 'Failed to clear prediction logs');
+    }
+  };
+
+  const handleDeleteLog = async (id: number) => {
+    try {
+      await api.delete(`/api/predictions/${id}`);
+      message.success(`Log #${id} deleted.`);
+      fetchHistory();
+    } catch (err: any) {
+      message.error(err.response?.data?.detail || 'Failed to delete log entry');
+    }
+  };
+
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <div>
@@ -69,7 +94,7 @@ export const PredictionHistoryPage: React.FC = () => {
 
       <Card bordered={false} style={{ borderRadius: 12 }}>
         <Row gutter={[12, 12]} align="middle">
-          <Col xs={24} sm={8} md={6}>
+          <Col xs={24} sm={8} md={5}>
             <Input
               prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
               placeholder="Filter by Student ID (e.g., SV0001)..."
@@ -100,7 +125,7 @@ export const PredictionHistoryPage: React.FC = () => {
             />
           </Col>
 
-          <Col xs={12} sm={8} md={5}>
+          <Col xs={12} sm={8} md={4}>
             <Select
               allowClear
               placeholder="Risk Level"
@@ -118,8 +143,8 @@ export const PredictionHistoryPage: React.FC = () => {
             />
           </Col>
 
-          <Col xs={24} md={8} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Space>
+          <Col xs={24} md={10} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Space wrap>
               <Tag color="blue" style={{ padding: '4px 10px' }}>
                 Total Evaluations: <strong>{data?.total ?? 0}</strong>
               </Tag>
@@ -130,10 +155,23 @@ export const PredictionHistoryPage: React.FC = () => {
                   setStage(undefined);
                   setRiskLevel(undefined);
                   setPage(1);
+                  fetchHistory();
                 }}
               >
-                Reset
+                Reset Filters
               </Button>
+              <Popconfirm
+                title="Reset all prediction logs?"
+                description="This will remove all saved evaluation logs from the table."
+                okText="Yes, Clear Logs"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true }}
+                onConfirm={handleClearAllLogs}
+              >
+                <Button danger icon={<DeleteOutlined />} disabled={!data?.total}>
+                  Reset Logs
+                </Button>
+              </Popconfirm>
             </Space>
           </Col>
         </Row>
@@ -211,18 +249,26 @@ export const PredictionHistoryPage: React.FC = () => {
               render: (dt: string) => new Date(dt).toLocaleString('en-US'),
             },
             {
-              title: 'Profile',
+              title: 'Actions',
               key: 'act',
-              width: 110,
+              width: 150,
               align: 'right',
               render: (_: any, r: PredictionOut) => (
-                <Button
-                  size="small"
-                  icon={<EyeOutlined />}
-                  onClick={() => navigate(`/students/${r.student_code}`)}
-                >
-                  View
-                </Button>
+                <Space size={6}>
+                  <Button
+                    size="small"
+                    icon={<EyeOutlined />}
+                    onClick={() => navigate(`/students/${r.student_code}`)}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDeleteLog(r.id)}
+                  />
+                </Space>
               ),
             },
           ]}
